@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Footer } from "@/components/Footer";
 import { BlogNewsletter } from "@/components/BlogNewsletter";
+import { PageHero } from "@/components/PageHero";
 import { blogPosts, getBlogPost } from "@/lib/blog";
 
 // ── Static article body content (keyed by slug) ──────────────────────────────
@@ -85,37 +86,35 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
   return (
     <main>
-      {/* ── ARTICLE HEADER — blue-deep ────────────────────────────────── */}
-      <section className="bg-brand-blue-deep py-10 sm:py-16 text-white">
-        <div className="shell max-w-4xl mx-auto">
-          <Link
-            href="/blogs"
-            className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-white/60 hover:text-white transition-colors mb-6 sm:mb-8"
-          >
-            ← Back to all articles
-          </Link>
-          <div>
-            <span className="blog-card__tag mb-3 inline-block">{post.category}</span>
+      {/* ── ARTICLE HEADER — PageHero (matches site-wide top-fold) ─────── */}
+      <PageHero
+        eyebrow={post.category}
+        heading={post.title}
+        aside={
+          <div className="flex flex-col gap-4 items-start lg:items-end">
+            <Link
+              href="/blogs"
+              className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-white/60 hover:text-white transition-colors"
+            >
+              ← Back to all articles
+            </Link>
+            <div className="flex flex-wrap items-center gap-2.5 sm:gap-3 text-white/60 text-xs sm:text-sm">
+              <Image
+                src={post.authorImg}
+                alt={post.author}
+                width={32}
+                height={32}
+                className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-white/25"
+              />
+              <span className="font-semibold text-white/80">{post.author}</span>
+              <span>·</span>
+              <span>{post.date}</span>
+              <span>·</span>
+              <span>{post.readTime}</span>
+            </div>
           </div>
-          <h1 className="mt-3 text-2xl font-black leading-tight text-white sm:text-4xl lg:text-5xl">
-            {post.title}
-          </h1>
-          <div className="mt-4 sm:mt-6 flex flex-wrap items-center gap-2.5 sm:gap-3 text-white/60 text-xs sm:text-sm">
-            <Image
-              src={post.authorImg}
-              alt={post.author}
-              width={32}
-              height={32}
-              className="h-7 w-7 sm:h-8 sm:w-8 rounded-full border border-white/25"
-            />
-            <span className="font-semibold text-white/80">{post.author}</span>
-            <span>·</span>
-            <span>{post.date}</span>
-            <span>·</span>
-            <span>{post.readTime}</span>
-          </div>
-        </div>
-      </section>
+        }
+      />
 
       {/* ── ARTICLE CONTENT — white background ──────────────────────── */}
       <article className="section shell max-w-4xl mx-auto">

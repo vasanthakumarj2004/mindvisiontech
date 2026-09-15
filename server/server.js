@@ -1,5 +1,7 @@
 import cors from 'cors';
 import express from 'express';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import morgan from 'morgan';
 import { connectDatabase } from './config/db.js';
 import { env } from './config/env.js';
@@ -9,7 +11,23 @@ import courseRoutes from './routes/courseRoutes.js';
 import leadRoutes from './routes/leadRoutes.js';
 
 const app = express();
+
+// ── HTTP Security Headers (Helmet) ──────────────────────────────────────────
+app.use(helmet());
+
+// ── CORS ────────────────────────────────────────────────────────────────────
 app.use(cors({ origin: env.clientUrl }));
+
+// ── API Abuse Protection (Rate Limiting) ────────────────────────────────────
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Limit each IP to 100 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many requests from this IP, please try again after 15 minutes.' }
+});
+app.use('/api', apiLimiter);
+
 app.use(express.json());
 app.use(morgan('dev'));
 

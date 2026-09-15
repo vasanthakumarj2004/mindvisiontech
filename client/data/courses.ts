@@ -35,7 +35,7 @@ export const coursesData: Course[] = [
       "Wireless Sensor Networks",
       "Embedded Linux",
     ],
-    image: "/images/courses/internet-of-things-iot.jpg",
+    image: "/images/courses/iot.jpg",
   },
   {
     _id: "ee-03",
@@ -51,7 +51,7 @@ export const coursesData: Course[] = [
       "Regenerative Braking System",
       "Wiring Harness",
     ],
-    image: "/images/courses/electric-vehicle-technology.jpg",
+    image: "/images/courses/ev-technology.jpg",
   },
 
   // ── Software Courses ────────────────────────────────────────────────────────
@@ -88,7 +88,7 @@ export const coursesData: Course[] = [
       "Spring Boot",
       "Web Technology",
     ],
-    image: "/images/courses/java-full-stack-developer.jpg",
+    image: "/images/courses/java-full-stack.jpg",
   },
   {
     _id: "sw-03",
@@ -107,6 +107,6 @@ export const coursesData: Course[] = [
       ".NET Core",
       "Web Technology",
     ],
-    image: "/images/courses/net-full-stack.jpg",
+    image: "/images/courses/dotnet-full-stack.jpg",
   },
 ];

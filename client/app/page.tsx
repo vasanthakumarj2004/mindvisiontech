@@ -34,20 +34,13 @@ const services: ServiceCardData[] = [
   { title: "PCB Design",           imageUrl: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=900&q=80" },
 ];
 
-const placements: PlacementCardData[] = [
-  { studentName: "Aarav Sharma",   companyName: "TechNova",    role: "Embedded Engineer",    salary: "₹6.5 LPA", photoUrl: "https://i.pravatar.cc/160?img=12", phone: "MV-2026-01" },
-  { studentName: "Priya Menon",    companyName: "Qualcomm",    role: "VLSI Verification",    salary: "₹9.2 LPA", photoUrl: "https://i.pravatar.cc/160?img=47", phone: "MV-2026-02" },
-  { studentName: "Rahul Verma",    companyName: "Bosch India", role: "Automation Engineer",  salary: "₹7.8 LPA", photoUrl: "https://i.pravatar.cc/160?img=11", phone: "MV-2026-03" },
-  { studentName: "Meera Nair",     companyName: "Texas Inst.", role: "Firmware Engineer",    salary: "₹10.5 LPA",photoUrl: "https://i.pravatar.cc/160?img=32", phone: "MV-2026-04" },
-  { studentName: "Karthik Raja",   companyName: "L&T TS",      role: "PCB Layout Engineer",  salary: "₹6.2 LPA", photoUrl: "https://i.pravatar.cc/160?img=60", phone: "MV-2026-05" },
-  { studentName: "Divya Reddy",    companyName: "HCL Tech",    role: "Full Stack Engineer",  salary: "₹8.0 LPA", photoUrl: "https://i.pravatar.cc/160?img=26", phone: "MV-2026-06" },
-];
+const placements: PlacementCardData[] = [];
 
 const tickerItems = [
   "CAREER SUPPORT",
   "TECHNICAL TRAINING",
   "AI INTEGRATED CAMPUS",
-  "100% PLACEMENT SUPPORT",
+  "PRACTICAL CAREER SUPPORT",
   "INDUSTRY PROJECTS",
   "EXPERT MENTORSHIP",
 ];
@@ -72,7 +65,10 @@ function SectionHeading({ eyebrow, title, note }: { eyebrow: string; title: Reac
   return (
     <div className="section-heading">
       <div>
-        <p className="eyebrow">{eyebrow}</p>
+        <p className="eyebrow flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.8)]" />
+          {eyebrow}
+        </p>
         <h2>{title}</h2>
       </div>
       <p className="section-note">{note}</p>
@@ -143,33 +139,35 @@ export default async function Home() {
       </section>
 
       {/* ── PLACEMENTS — blue-wash background ───────────────────────────── */}
-      <section className="bg-brand-blue-wash py-24" id="placements">
-        <div className="shell">
-          <SectionHeading
-            eyebrow="Real outcomes"
-            title={<>Success worth<br /><em>celebrating.</em></>}
-            note="Our placement team stays with students from first portfolio review to first day at work."
-          />
-          <InfiniteMarquee
-            items={placements}
-            speed={55}
-            direction="right"
-            ariaLabel="MindVisionTech placement success stories"
-            edgeFrom="from-brand-blue-wash"
-          >
-            {(placement) => <PlacementCard {...placement} />}
-          </InfiniteMarquee>
-        </div>
-      </section>
+      {placements.length > 0 && (
+        <section className="bg-brand-blue-wash py-24" id="placements">
+          <div className="shell">
+            <SectionHeading
+              eyebrow="Real outcomes"
+              title={<>Success worth<br /><em>celebrating.</em></>}
+              note="Our placement team stays with students from first portfolio review to first day at work."
+            />
+            <InfiniteMarquee
+              items={placements}
+              speed={55}
+              direction="right"
+              ariaLabel="MindVisionTech placement success stories"
+              edgeFrom="from-brand-blue-wash"
+            >
+              {(placement) => <PlacementCard {...placement} />}
+            </InfiniteMarquee>
+          </div>
+        </section>
+      )}
 
       {/* ── ENQUIRE — blue-deep background (dark CTA section) ────────────── */}
       <section className="bg-brand-blue-deep py-12" id="enquire" style={{ backgroundColor: "#081d4a", color: "#ffffff" }}>
         <div className="shell enquire">
           <div className="enquire-title">
-            <p className="eyebrow" style={{ color: "#ef7e20", fontWeight: 900, letterSpacing: "0.22em", textTransform: "uppercase" }}>No hard sell</p>
+            <p className="eyebrow" style={{ color: "#facc15", fontWeight: 900, letterSpacing: "0.22em", textTransform: "uppercase" }}>✦ No hard sell</p>
             <h2 style={{ color: "#ffffff", fontSize: "clamp(32px, 4vw, 48px)", fontWeight: 900, lineHeight: 1.1 }}>
               Start with a<br />
-              <em style={{ color: "#ef7e20", fontStyle: "normal" }}>question.</em>
+              <em style={{ color: "#facc15", fontStyle: "normal" }}>question.</em>
             </h2>
             <p style={{ color: "rgba(255,255,255,0.85)", fontSize: "16px", lineHeight: 1.5 }}>
               Tell us what you are figuring out. We will help you find the right next step.

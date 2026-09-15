@@ -41,12 +41,8 @@ const values = [
   },
 ];
 
-const team = [
-  { name: "Dr. Kiran Reddy",     role: "Founder & Director",       img: "https://i.pravatar.cc/240?img=68" },
-  { name: "Anjali Nambiar",      role: "Head of Curriculum",        img: "https://i.pravatar.cc/240?img=47" },
-  { name: "Suresh Krishnamurthy",role: "Placement Director",        img: "https://i.pravatar.cc/240?img=70" },
-  { name: "Preethi Balaji",      role: "Student Success Manager",   img: "https://i.pravatar.cc/240?img=56" },
-];
+type TeamMember = { name: string; role: string; img: string };
+const team: TeamMember[] = [];
 
 export default function AboutPage() {
   return (
@@ -131,29 +127,31 @@ export default function AboutPage() {
       </section>
 
       {/* ── TEAM — white background ────────────────────────────────────── */}
-      <section className="section shell" id="team">
-        <p className="eyebrow">The people behind it</p>
-        <h2 className="mb-10 sm:mb-16">
-          Our<br /><em>leadership team.</em>
-        </h2>
-        <div className="grid gap-6 sm:gap-8 grid-cols-2 lg:grid-cols-4">
-          {team.map((member) => (
-            <div key={member.name} className="group text-center">
-              <div className="mx-auto mb-3 sm:mb-4 h-28 w-28 sm:h-36 sm:w-36 overflow-hidden rounded-full border-4 border-brand-blue-soft shadow-blue-md transition-all group-hover:border-brand-blue group-hover:shadow-blue-lg">
-                <Image
-                  src={member.img}
-                  alt={member.name}
-                  width={144}
-                  height={144}
-                  className="h-full w-full object-cover"
-                />
+      {team.length > 0 && (
+        <section className="section shell" id="team">
+          <p className="eyebrow">The people behind it</p>
+          <h2 className="mb-10 sm:mb-16">
+            Our<br /><em>leadership team.</em>
+          </h2>
+          <div className="grid gap-6 sm:gap-8 grid-cols-2 lg:grid-cols-4">
+            {team.map((member) => (
+              <div key={member.name} className="group text-center">
+                <div className="mx-auto mb-3 sm:mb-4 h-28 w-28 sm:h-36 sm:w-36 overflow-hidden rounded-full border-4 border-brand-blue-soft shadow-blue-md transition-all group-hover:border-brand-blue group-hover:shadow-blue-lg">
+                  <Image
+                    src={member.img}
+                    alt={member.name}
+                    width={144}
+                    height={144}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <h3 className="text-base sm:text-lg font-bold text-brand-navy">{member.name}</h3>
+                <p className="text-xs sm:text-sm text-brand-navy/60">{member.role}</p>
               </div>
-              <h3 className="text-base sm:text-lg font-bold text-brand-navy">{member.name}</h3>
-              <p className="text-xs sm:text-sm text-brand-navy/60">{member.role}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── CTA BAND — blue-deep ──────────────────────────────────────── */}
       <section

@@ -35,10 +35,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
         heading={course.name}
         subheading={course.description}
         aside={
-          <div className="rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur-md text-white text-center space-y-3">
-            <div className="text-xs font-bold uppercase tracking-widest text-brand-orange">Course Fee</div>
-            <div className="text-3xl font-black">₹{course.fees.toLocaleString("en-IN")}</div>
-            <div className="text-xs text-white/70">Flexible No-Cost EMI Available</div>
+          <div className="rounded-3xl border border-white/20 bg-white/10 p-6 backdrop-blur-md text-white text-center space-y-2">
+            <div className="text-xs font-bold uppercase tracking-widest text-brand-orange">Program Track</div>
+            <div className="text-2xl sm:text-3xl font-black">{course.duration}</div>
+            <div className="text-xs text-white/80">In-Person Labs &amp; Guided Career Support</div>
           </div>
         }
       />
@@ -61,7 +61,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
                 { title: "Duration", val: course.duration },
                 { title: "Mode", val: "In-Person Labs & Online" },
                 { title: "Projects", val: "4 Capstone Projects" },
-                { title: "Support", val: "100% Placement Drives" },
+                { title: "Support", val: "Career Guidance" },
               ].map((item) => (
                 <div key={item.title} className="rounded-xl sm:rounded-2xl border border-brand-blue/15 bg-brand-blue-wash p-3.5 sm:p-4">
                   <p className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-brand-blue">{item.title}</p>
@@ -110,7 +110,7 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ s
               Reserve your spot in<br /><em style={{ color: "#ef7e20" }}>the upcoming batch.</em>
             </h2>
             <p className="mt-3 sm:mt-4 text-sm sm:text-base leading-relaxed" style={{ color: "rgba(255,255,255,0.72)" }}>
-              Submit your enquiry below and an admissions advisor will get back to you with batch schedules and fee payment options within 24 hours.
+              Submit your enquiry below and an admissions advisor will get back to you with batch schedules, syllabus details, and admission options within 24 hours.
             </p>
           </div>
           <div>

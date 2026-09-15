@@ -4,7 +4,7 @@ export type Course = {
   slug: string;
   description: string;
   duration: string;
-  fees: number;
+  fees?: number;
   category?: string;
   topics?: string[];
   image?: string;

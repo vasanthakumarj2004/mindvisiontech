@@ -4,7 +4,9 @@ import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { companyInfo } from "@/data/company";
 import { Navbar } from "@/components/Navbar";
+import { AnnouncementRibbon } from "@/components/AnnouncementRibbon";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
+import { DeferredCourseChatbot } from "@/components/DeferredCourseChatbot";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -67,8 +69,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       </head>
       <body className="min-h-full flex flex-col relative">
         <Navbar />
+        <AnnouncementRibbon />
         {children}
         <WhatsAppFloat />
+        <DeferredCourseChatbot />
       </body>
     </html>
   );

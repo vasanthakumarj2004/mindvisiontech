@@ -21,7 +21,7 @@ export function Footer() {
             />
           </Link>
           <p className="text-sm leading-relaxed" style={{ color: "rgba(255, 255, 255, 0.70)" }}>
-            India&apos;s leading embedded systems, VLSI, and AI engineering institute. Hands-on labs, 100% placement support.
+            India&apos;s leading embedded systems, VLSI, and AI engineering institute. Hands-on labs and practical career guidance.
           </p>
 
           {/* Social Links */}
@@ -56,7 +56,6 @@ export function Footer() {
             <li><Link href="/about" className="hover:text-white transition-colors" style={{ color: "rgba(255, 255, 255, 0.85)" }}>About Us</Link></li>
             <li><Link href="/services" className="hover:text-white transition-colors" style={{ color: "rgba(255, 255, 255, 0.85)" }}>Services</Link></li>
             <li><Link href="/courses" className="hover:text-white transition-colors" style={{ color: "rgba(255, 255, 255, 0.85)" }}>All Courses</Link></li>
-            <li><Link href="/careers" className="hover:text-white transition-colors" style={{ color: "rgba(255, 255, 255, 0.85)" }}>Careers & Placements</Link></li>
           </ul>
         </div>
 
