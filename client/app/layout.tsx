@@ -3,8 +3,7 @@ import type { ReactNode } from "react";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { companyInfo } from "@/data/company";
-import { Navbar } from "@/components/Navbar";
-import { AnnouncementRibbon } from "@/components/AnnouncementRibbon";
+import { Header } from "@/components/Header";
 import { WhatsAppFloat } from "@/components/WhatsAppFloat";
 import { DeferredCourseChatbot } from "@/components/DeferredCourseChatbot";
 
@@ -68,8 +67,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className="min-h-full flex flex-col relative">
-        <Navbar />
-        <AnnouncementRibbon />
+        <Header />
         {children}
         <WhatsAppFloat />
         <DeferredCourseChatbot />

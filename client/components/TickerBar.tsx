@@ -48,9 +48,10 @@ export function TickerBar({ items, speed = 28 }: TickerBarProps) {
             >
               {item}
             </span>
-            {/* Golden yellow diamond accent */}
+            {/* Orange diamond accent */}
             <span
-              className="shrink-0 text-sm font-black sm:text-base text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.6)]"
+              className="shrink-0 text-sm font-bold sm:text-base"
+              style={{ color: "#ef7e20" }}
               aria-hidden="true"
             >
               ✦

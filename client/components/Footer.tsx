@@ -16,7 +16,7 @@ export function Footer() {
               src="/mindvisiontech-logo.svg"
               alt={companyInfo.name}
               width={180}
-              height={44}
+              height={45}
               className="h-auto w-40 brightness-0 invert"
             />
           </Link>

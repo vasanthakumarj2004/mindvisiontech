@@ -1,14 +1,69 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" role="img" aria-labelledby="title desc">
-  <title id="title">MindVisionTech Innovation</title>
-  <desc id="desc">MindVisionTech logo with blue M, orange V and sun mark</desc>
-  <g transform="translate(16 10) scale(.2)">
-    <circle cx="384" cy="136" r="91" fill="#EF7E20"/>
-    <path fill="#0B2B6B" d="M36 73 323 318l31 148L123 264v329L36 510Zm696 0L445 318l-31 148 231-202v329l87-83Z"/>
-    <path fill="#EF7E20" d="m161 349 223 197 223-197-223 375Z"/>
+<svg viewBox="0 0 740 170" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="MindVisionTech Innovation - Success Starts with One Decision">
+  <!-- Emblem Mark (Sun + M + V) -->
+  <g transform="translate(15, 15) scale(0.18)">
+    <circle cx="384" cy="136" r="91" fill="#EF7E20" />
+    <path
+      fill="#0B2B6B"
+      d="M36 73 323 318l31 148L123 264v329L36 510Zm696 0L445 318l-31 148 231-202v329l87-83Z"
+    />
+    <path fill="#EF7E20" d="m161 349 223 197 223-197-223 375Z" />
   </g>
-  <text x="205" y="96" fill="#0B2B6B" font-family="Arial,Helvetica,sans-serif" font-size="54" font-weight="700" letter-spacing="1">MINDVISION</text>
-  <text x="594" y="96" fill="#EF7E20" font-family="Arial,Helvetica,sans-serif" font-size="54" font-weight="700" letter-spacing="1">TECH</text>
-  <text x="390" y="136" fill="#EF7E20" font-family="Arial,Helvetica,sans-serif" font-size="17" font-weight="700" letter-spacing="12">INNOVATION</text>
-  <path stroke="#EF7E20" stroke-width="3" d="M350 164h55M646 164h55"/>
-  <text x="418" y="170" fill="#121E36" font-family="Georgia,serif" font-size="18" font-style="italic">Success Starts with One Decision</text>
+
+  <!-- MINDVISION TECH (Single unified text element with tspan for natural, seamless word spacing) -->
+  <text
+    x="180"
+    y="74"
+    font-family="'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif"
+    font-size="44"
+    font-weight="900"
+    letter-spacing="1"
+  >
+    <tspan fill="#0B2B6B">MINDVISION </tspan>
+    <tspan fill="#EF7E20">TECH</tspan>
+  </text>
+
+  <!-- INNOVATION (Symmetrically centered below MINDVISION TECH) -->
+  <text
+    x="415"
+    y="110"
+    text-anchor="middle"
+    fill="#EF7E20"
+    font-family="'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif"
+    font-size="18"
+    font-weight="800"
+    letter-spacing="8"
+  >
+    INNOVATION
+  </text>
+
+  <!-- Tagline with precisely balanced flanking orange accent lines (No overlap, no extra gap) -->
+  <line
+    x1="180"
+    y1="142"
+    x2="268"
+    y2="142"
+    stroke="#EF7E20"
+    stroke-width="2.5"
+    stroke-linecap="round"
+  />
+  <text
+    x="415"
+    y="147"
+    text-anchor="middle"
+    fill="#121E36"
+    font-family="Georgia, 'Times New Roman', serif"
+    font-size="16"
+    font-style="italic"
+  >
+    Success Starts with One Decision
+  </text>
+  <line
+    x1="562"
+    y1="142"
+    x2="650"
+    y2="142"
+    stroke="#EF7E20"
+    stroke-width="2.5"
+    stroke-linecap="round"
+  />
 </svg>
