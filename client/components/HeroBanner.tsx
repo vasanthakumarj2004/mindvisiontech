@@ -225,21 +225,6 @@ function SlideOne() {
         className="object-cover object-center"
       />
 
-      {/* ── Gen AI Badge (top-right) ── */}
-      <div className="absolute top-4 right-4 sm:right-6 z-30 flex items-center justify-center rounded-2xl bg-white px-3 py-2 sm:px-4 sm:py-2.5 shadow-xl border border-white/80">
-        <div className="flex flex-col items-center leading-none text-center">
-          <div className="flex items-center gap-1">
-            <span className="text-base sm:text-xl font-black bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 bg-clip-text text-transparent">
-              Ai
-            </span>
-            <Sparkles className="h-3 w-3 text-cyan-500 fill-cyan-400 animate-pulse" />
-          </div>
-          <span className="text-[9px] sm:text-[10px] font-extrabold tracking-wider text-slate-800 uppercase mt-0.5">
-            Gen AI
-          </span>
-        </div>
-      </div>
-
       {/* ── Text Content (left-aligned, vertically centered) ── */}
       <div className="relative z-10 flex h-full min-h-[460px] sm:min-h-[500px] lg:min-h-[580px] items-center">
         <div className="flex flex-col space-y-4 sm:space-y-5 px-6 sm:px-12 lg:px-16 xl:px-20 max-w-sm sm:max-w-md lg:max-w-lg">

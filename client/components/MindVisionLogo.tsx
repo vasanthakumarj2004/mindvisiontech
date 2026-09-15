@@ -23,35 +23,35 @@ export function MindVisionLogo(props: SVGProps<SVGSVGElement>) {
       {/* ── MINDVISION TECH (Single unified text node for natural kerning) ── */}
       <text
         x="180"
-        y="74"
+        y="78"
         fontFamily="'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif"
-        fontSize="44"
+        fontSize="48"
         fontWeight="900"
-        letterSpacing="1"
+        letterSpacing="0"
       >
-        <tspan fill="#0B2B6B">MINDVISION </tspan>
+        <tspan fill="#0B2B6B">MINDVISION</tspan>
         <tspan fill="#EF7E20">TECH</tspan>
       </text>
 
       {/* ── INNOVATION (Symmetrically centered below MINDVISION TECH) ── */}
       <text
         x="415"
-        y="110"
+        y="116"
         textAnchor="middle"
         fill="#EF7E20"
         fontFamily="'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, Arial, sans-serif"
-        fontSize="18"
+        fontSize="20"
         fontWeight="800"
-        letterSpacing="8"
+        letterSpacing="9"
       >
         INNOVATION
       </text>
 
       {/* ── Tagline with perfectly balanced flanking lines (No overlap, no extra gap) ── */}
       <line
-        x1="180"
+        x1="190"
         y1="142"
-        x2="270"
+        x2="285"
         y2="142"
         stroke="#EF7E20"
         strokeWidth="2.5"
@@ -59,17 +59,17 @@ export function MindVisionLogo(props: SVGProps<SVGSVGElement>) {
       />
       <text
         x="415"
-        y="147"
+        y="148"
         textAnchor="middle"
         fill="#121E36"
         fontFamily="Georgia, 'Times New Roman', serif"
-        fontSize="16"
+        fontSize="17"
         fontStyle="italic"
       >
         Success Starts with One Decision
       </text>
       <line
-        x1="560"
+        x1="555"
         y1="142"
         x2="650"
         y2="142"
