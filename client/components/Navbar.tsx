@@ -172,10 +172,9 @@ export function Navbar() {
           })}
         </div>
 
-        {/* Mobile Header Title / Quick Indicator */}
+        {/* Mobile Header indicator */}
         <div className="flex lg:hidden items-center gap-2 text-white font-bold text-sm tracking-wide">
           <span className="h-2 w-2 rounded-full bg-brand-orange animate-pulse" />
-          <span>Navigation Menu</span>
         </div>
 
         {/* Right-aligned: High-Contrast White Pill Button "Quick Enquiry" */}

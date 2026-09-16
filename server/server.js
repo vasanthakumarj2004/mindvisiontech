@@ -12,16 +12,25 @@ import leadRoutes from './routes/leadRoutes.js';
 
 const app = express();
 
-// ── HTTP Security Headers (Helmet) ──────────────────────────────────────────
 app.use(helmet());
 
-// ── CORS ────────────────────────────────────────────────────────────────────
-app.use(cors({ origin: env.clientUrl }));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || env.corsOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
 
-// ── API Abuse Protection (Rate Limiting) ────────────────────────────────────
+      callback(new Error(`Origin ${origin} is not allowed by CORS`));
+    },
+    credentials: true
+  })
+);
+
 const apiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: 15 * 60 * 1000,
+  max: 100,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: 'Too many requests from this IP, please try again after 15 minutes.' }
@@ -29,7 +38,7 @@ const apiLimiter = rateLimit({
 app.use('/api', apiLimiter);
 
 app.use(express.json());
-app.use(morgan('dev'));
+app.use(morgan(env.nodeEnv === 'production' ? 'combined' : 'dev'));
 
 app.get('/api/health', (_req, res) => res.json({ status: 'ok' }));
 app.use('/api/courses', courseRoutes);
@@ -39,7 +48,7 @@ app.use(errorHandler);
 
 if (process.env.NODE_ENV !== 'test') {
   connectDatabase(env.mongoUri)
-    .then(() => app.listen(env.port, () => console.log(`API listening on http://localhost:${env.port}`)))
+    .then(() => app.listen(env.port, () => console.info(`API listening on http://localhost:${env.port}`)))
     .catch((error) => {
       console.error('Unable to start server', error);
       process.exit(1);

@@ -4,7 +4,7 @@ import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { companyInfo } from "@/data/company";
 import { Header } from "@/components/Header";
-import { WhatsAppFloat } from "@/components/WhatsAppFloat";
+import { FloatingContactButton } from "@/components/FloatingContactButton";
 import { DeferredCourseChatbot } from "@/components/DeferredCourseChatbot";
 
 const geistSans = Geist({
@@ -69,7 +69,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body className="min-h-full flex flex-col relative">
         <Header />
         {children}
-        <WhatsAppFloat />
+        <FloatingContactButton />
         <DeferredCourseChatbot />
       </body>
     </html>

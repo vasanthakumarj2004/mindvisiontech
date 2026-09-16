@@ -2,7 +2,14 @@ node_modules/
 .next/
 out/
 .env
-.env.local
-.env.docker
-server/.env.docker
+.env.*
+!.env.example
+!.env.docker.example
+client/.env
+client/.env.*
+!client/.env.example
+server/.env
+server/.env.*
+!server/.env.example
+!server/.env.docker.example
 npm-debug.log*

@@ -52,6 +52,7 @@ export function CourseChatbot() {
 
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const messageIdRef = useRef(0);
   const shouldReduceMotion = useReducedMotion();
 
   // Categories extracted dynamically from courses data
@@ -119,7 +120,8 @@ export function CourseChatbot() {
 
   // Helper to add bot and user messages
   function addMessage(msg: Omit<ChatMessage, "id">) {
-    setMessages((prev) => [...prev, { ...msg, id: `${Date.now()}-${Math.random()}` }]);
+    const id = `msg-${messageIdRef.current++}`;
+    setMessages((prev) => [...prev, { ...msg, id }]);
   }
 
   // ── Step Handlers ───────────────────────────────────────────────────────────
@@ -244,13 +246,13 @@ export function CourseChatbot() {
     <>
       {/* ── Floating Launcher Button ────────────────────────────────────────── */}
       {/* Positioned vertically above WhatsAppFloat (WhatsApp + Instagram) */}
-      <div className="fixed bottom-[124px] right-4 z-50 sm:bottom-[152px] sm:right-6">
+      <div className="fixed bottom-5 right-4 z-[90] sm:right-6">
         <button
           onClick={() => (isOpen ? handleClose() : setIsOpen(true))}
           type="button"
           aria-expanded={isOpen}
           aria-label={isOpen ? "Close Course Assistant" : "Open Course Assistant Chatbot"}
-          className="group relative flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-brand-navy text-white shadow-blue-lg transition-all duration-300 hover:scale-110 hover:bg-brand-blue active:scale-95 focus:outline-none focus:ring-4 focus:ring-brand-blue/30"
+          className="group relative z-[90] flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full bg-brand-navy text-white shadow-blue-lg transition-all duration-300 hover:scale-110 hover:bg-brand-blue active:scale-95 focus:outline-none focus:ring-4 focus:ring-brand-blue/30"
         >
           {isOpen ? (
             <X className="h-6 w-6 text-white transition-transform group-hover:rotate-90" />
@@ -294,7 +296,7 @@ export function CourseChatbot() {
                   : { opacity: 0, y: 20, scale: 0.95 }
               }
               transition={{ duration: 0.22, ease: "easeOut" }}
-              className="fixed inset-x-0 bottom-0 z-50 flex h-[min(520px,78vh)] max-h-[78vh] flex-col overflow-hidden rounded-t-3xl border-t-2 border-brand-blue/15 bg-white shadow-xl sm:inset-auto sm:bottom-6 sm:right-6 sm:h-[520px] sm:max-h-[85vh] sm:w-[380px] sm:rounded-3xl sm:border-2 sm:border-brand-blue/15"
+              className="fixed inset-x-0 bottom-0 z-[130] flex h-[min(520px,78vh)] max-h-[78vh] flex-col overflow-hidden rounded-t-3xl border-t-2 border-brand-blue/15 bg-white shadow-xl sm:inset-auto sm:bottom-6 sm:right-6 sm:h-[520px] sm:max-h-[85vh] sm:w-[380px] sm:rounded-3xl sm:border-2 sm:border-brand-blue/15"
               role="dialog"
               aria-label="MindVisionTech Course Assistant"
             >

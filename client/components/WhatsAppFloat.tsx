@@ -7,7 +7,7 @@ export function WhatsAppFloat() {
   return (
     <aside
       aria-label="Quick contact and social channels"
-      className="fixed bottom-6 right-4 sm:right-6 z-50 flex flex-col items-center gap-3 select-none"
+      className="fixed bottom-4 right-4 sm:right-6 z-50 flex flex-col items-center gap-4 select-none"
     >
       {/* 1. Phone / Call Icon */}
       <a
