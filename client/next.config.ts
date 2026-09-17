@@ -27,12 +27,17 @@ const securityHeaders = [
   },
 ];
 
+const isExport = process.env.NEXT_OUTPUT_MODE === "export";
+
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: isExport ? "export" : "standalone",
   reactStrictMode: true,
   devIndicators: false,
   images: {
+    unoptimized: isExport,
     remotePatterns: [
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "i.pravatar.cc" },
       { protocol: "https", hostname: "*.s3.amazonaws.com" },
       { protocol: "https", hostname: "*.s3.us-east-1.amazonaws.com" },
       { protocol: "https", hostname: "*.cloudfront.net" },

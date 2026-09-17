@@ -345,7 +345,7 @@ function SlideTwo() {
           {/* Mobile View: High-res hardware prototype */}
           <div className="relative h-full w-full block sm:hidden">
             <Image
-              src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=85"
+              src="/images/hero/hardware-lab-prototype.jpg"
               alt="Engineers working on embedded hardware prototype"
               fill
               sizes="100vw"
@@ -359,7 +359,7 @@ function SlideTwo() {
               <Hero3DModel />
             ) : (
               <Image
-                src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=85"
+                src="/images/hero/hardware-lab-prototype.jpg"
                 alt="Engineers working on embedded hardware prototype"
                 fill
                 sizes="(max-width: 1024px) 100vw, 45vw"

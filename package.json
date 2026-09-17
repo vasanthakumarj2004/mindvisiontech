@@ -4,9 +4,13 @@
   "scripts": {
     "dev": "concurrently \"npm --prefix server run dev\" \"npm --prefix client run dev\"",
     "build": "npm --prefix client run build",
+    "build:static": "npm --prefix client run build:static",
     "start": "npm --prefix client run start",
     "dev:server": "npm --prefix server run dev",
     "dev:client": "npm --prefix client run dev",
+    "test": "npm --prefix server run test && npm --prefix client run test",
+    "test:server": "npm --prefix server run test",
+    "test:client": "npm --prefix client run test",
     "install:all": "npm install --prefix server && npm install --prefix client"
   },
   "devDependencies": {

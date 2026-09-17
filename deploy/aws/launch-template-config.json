@@ -1,0 +1,57 @@
+{
+  "LaunchTemplateName": "mindvisiontech-api-template",
+  "VersionDescription": "v1.0 - Production Free Tier Launch Template",
+  "LaunchTemplateData": {
+    "InstanceType": "t3.micro",
+    "CreditSpecification": {
+      "CpuCredits": "standard"
+    },
+    "Monitoring": {
+      "Enabled": true
+    },
+    "IamInstanceProfile": {
+      "Name": "MindVisionTech-EC2-SSM-Role"
+    },
+    "BlockDeviceMappings": [
+      {
+        "DeviceName": "/dev/sda1",
+        "Ebs": {
+          "VolumeSize": 20,
+          "VolumeType": "gp3",
+          "DeleteOnTermination": true,
+          "Encrypted": true
+        }
+      }
+    ],
+    "NetworkInterfaces": [
+      {
+        "DeviceIndex": 0,
+        "AssociatePublicIpAddress": true,
+        "DeleteOnTermination": true,
+        "Groups": [
+          "sg-xxxxxxxxxxxxxxxxx"
+        ]
+      }
+    ],
+    "TagSpecifications": [
+      {
+        "ResourceType": "instance",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "mindvisiontech-api-worker"
+          },
+          {
+            "Key": "Environment",
+            "Value": "production"
+          },
+          {
+            "Key": "Project",
+            "Value": "mindvisiontech"
+          }
+        ]
+      }
+    ],
+    "UserData": ""
+  }
+}

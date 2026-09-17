@@ -26,12 +26,12 @@ const fallbackBranches: Branch[] = [
 
 // ── Static page data ──────────────────────────────────────────────────────────
 const services: ServiceCardData[] = [
-  { title: "Python Full Stack",    imageUrl: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=900&q=80" },
-  { title: "Java Full Stack",      imageUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=900&q=80" },
-  { title: ".NET Full Stack",      imageUrl: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=900&q=80" },
-  { title: "VLSI Design",          imageUrl: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80" },
-  { title: "Embedded Systems",     imageUrl: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80" },
-  { title: "PCB Design",           imageUrl: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=900&q=80" },
+  { title: "Python Full Stack",    imageUrl: "/images/services/python-full-stack.jpg" },
+  { title: "Java Full Stack",      imageUrl: "/images/services/java-full-stack.jpg" },
+  { title: ".NET Full Stack",      imageUrl: "/images/services/dotnet-full-stack.jpg" },
+  { title: "VLSI Design",          imageUrl: "/images/services/vlsi-design.jpg" },
+  { title: "Embedded Systems",     imageUrl: "/images/services/embedded-systems.jpg" },
+  { title: "PCB Design",           imageUrl: "/images/services/pcb-design.jpg" },
 ];
 
 const placements: PlacementCardData[] = [];
