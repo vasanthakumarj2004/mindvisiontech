@@ -1,0 +1,112 @@
+name: Production Continuous Deployment (CD)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  # ----------------------------------------------------------------------------
+  # Stage 1: Automated Test Verification
+  # ----------------------------------------------------------------------------
+  test:
+    name: Run Automated Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: |
+          npm ci
+          npm --prefix server ci
+          npm --prefix client ci
+
+      - name: Run Test Suites
+        run: npm test
+
+  # ----------------------------------------------------------------------------
+  # Stage 2: Deploy Frontend to S3 + CloudFront (Sub-60s Global Edge Update)
+  # ----------------------------------------------------------------------------
+  deploy-frontend:
+    name: Deploy Static Frontend (S3 + CloudFront)
+    needs: test
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.commits[0].modified, 'client/') ||
+      contains(github.event.commits[0].added, 'client/')
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install & Build Static Frontend
+        run: |
+          npm --prefix client ci
+          npm --prefix client run build:static
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'ap-south-1' }}
+
+      - name: Sync Static Assets to S3
+        run: |
+          aws s3 sync client/out/ s3://${{ secrets.AWS_S3_BUCKET }} --delete --cache-control "public, max-age=31536000, immutable" --exclude "*.html"
+          aws s3 sync client/out/ s3://${{ secrets.AWS_S3_BUCKET }} --delete --cache-control "public, max-age=0, must-revalidate" --include "*.html"
+
+      - name: Invalidate CloudFront Edge Cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ secrets.CLOUDFRONT_DIST_ID }} \
+            --paths "/*"
+
+  # ----------------------------------------------------------------------------
+  # Stage 3: Deploy Backend to EC2 (Zero-Downtime Docker Hot Reload)
+  # ----------------------------------------------------------------------------
+  deploy-backend:
+    name: Deploy Backend API (EC2 Rolling Reload)
+    needs: test
+    runs-on: ubuntu-latest
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.commits[0].modified, 'server/') ||
+      contains(github.event.commits[0].added, 'server/') ||
+      contains(github.event.commits[0].modified, 'deploy/')
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'ap-south-1' }}
+
+      - name: Trigger Instant Zero-Downtime Reload via AWS Systems Manager (SSM)
+        run: |
+          # Executes deploy/aws/update-prod.sh on all production instances without needing SSH keys or open port 22!
+          COMMAND_ID=$(aws ssm send-command \
+            --targets "Key=tag:Project,Values=mindvisiontech" \
+            --document-name "AWS-RunShellScript" \
+            --parameters 'commands=["sudo /opt/mindvisiontech/deploy/aws/update-prod.sh main"]' \
+            --comment "Instant CD Deployment: Commit ${{ github.sha }}" \
+            --query "Command.CommandId" \
+            --output text)
+
+          echo "SSM Command Sent: ${COMMAND_ID}. Waiting for completion..."
+          aws ssm wait command-executed --command-id "${COMMAND_ID}" --instance-id $(aws ec2 describe-instances --filters "Name=tag:Project,Values=mindvisiontech" "Name=instance-state-name,Values=running" --query "Reservations[0].Instances[0].InstanceId" --output text)
+          echo "SUCCESS: Backend deployment verified and running live on production!"

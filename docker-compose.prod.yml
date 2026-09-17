@@ -49,6 +49,7 @@ services:
 
 volumes:
   mindvisiontech-mongodb-data:
+    name: mindvisiontech_persistent_mongo_data
 
 networks:
   internal-net:
