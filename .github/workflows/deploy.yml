@@ -5,17 +5,45 @@ on:
     branches:
       - main
   workflow_dispatch:
+    inputs:
+      target:
+        description: 'Select component to deploy'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+          - all
+          - frontend
+          - backend
 
 jobs:
   # ----------------------------------------------------------------------------
-  # Stage 1: Automated Test Verification
+  # Stage 1: Automated Test Verification & Path Diff Detection
   # ----------------------------------------------------------------------------
   test:
-    name: Run Automated Tests
+    name: Run Automated Tests & Detect Changes
     runs-on: ubuntu-latest
+    outputs:
+      frontend: ${{ steps.filter.outputs.frontend }}
+      backend: ${{ steps.filter.outputs.backend }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
+
+      # Accurate path detection supporting single commits, multi-commits, and merges
+      - name: Detect Changed Paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            frontend:
+              - 'client/**'
+              - 'package*.json'
+            backend:
+              - 'server/**'
+              - 'deploy/**'
+              - 'docker-compose*'
+              - 'package*.json'
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -40,9 +68,10 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.commits[0].modified, 'client/') ||
-      contains(github.event.commits[0].added, 'client/')
+      needs.test.result == 'success' && (
+        (github.event_name == 'workflow_dispatch' && (inputs.target == 'all' || inputs.target == 'frontend')) ||
+        (github.event_name == 'push' && needs.test.outputs.frontend == 'true')
+      )
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -57,6 +86,8 @@ jobs:
         run: |
           npm --prefix client ci
           npm --prefix client run build:static
+        env:
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL || 'https://api.mindvisiontech.com/api' }}
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -84,21 +115,34 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     if: |
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.commits[0].modified, 'server/') ||
-      contains(github.event.commits[0].added, 'server/') ||
-      contains(github.event.commits[0].modified, 'deploy/')
+      needs.test.result == 'success' && (
+        (github.event_name == 'workflow_dispatch' && (inputs.target == 'all' || inputs.target == 'backend')) ||
+        (github.event_name == 'push' && needs.test.outputs.backend == 'true')
+      )
     steps:
-      - name: Configure AWS Credentials
+      # Option 1: Direct SSH via Elastic IP (Ideal for Manual AWS Setup)
+      - name: Deploy via SSH to EC2 Elastic IP
+        if: "${{ secrets.EC2_HOST != '' && secrets.EC2_SSH_KEY != '' }}"
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            sudo /opt/mindvisiontech/deploy/aws/update-prod.sh main
+
+      # Option 2: Fallback to AWS Systems Manager (SSM) if IAM credentials are used
+      - name: Configure AWS Credentials (SSM Fallback)
+        if: "${{ secrets.EC2_HOST == '' || secrets.EC2_SSH_KEY == '' }}"
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION || 'ap-south-1' }}
 
-      - name: Trigger Instant Zero-Downtime Reload via AWS Systems Manager (SSM)
+      - name: Trigger Zero-Downtime Reload via AWS Systems Manager (SSM)
+        if: "${{ secrets.EC2_HOST == '' || secrets.EC2_SSH_KEY == '' }}"
         run: |
-          # Executes deploy/aws/update-prod.sh on all production instances without needing SSH keys or open port 22!
           COMMAND_ID=$(aws ssm send-command \
             --targets "Key=tag:Project,Values=mindvisiontech" \
             --document-name "AWS-RunShellScript" \
