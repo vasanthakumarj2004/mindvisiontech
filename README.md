@@ -9,6 +9,9 @@
 
 MindVisionTech is an enterprise-grade web application platform providing industry-focused training, embedded systems, VLSI, and IoT engineering courses. The platform is architected for **high performance, zero downtime, cost efficiency, and automated scalability** on Amazon Web Services (AWS).
 
+> 📘 **Looking for deep technical specifications, AWS architecture diagrams, or itemized service cost tables?**  
+> Check out the complete [**System Architecture & Engineering Specifications**](SYSTEM_ARCHITECTURE.md).
+
 ---
 
 ## 1. System Architecture
