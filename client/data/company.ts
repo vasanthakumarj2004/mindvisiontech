@@ -9,7 +9,7 @@ export const companyInfo = {
     line1: "56, 472, Marudhamalai Road, P N Pudur,",
     line2: "Coimbatore, Tamil Nadu - 641041",
     full: "56, 472, Marudhamalai Road, P N Pudur, Coimbatore, Tamil Nadu - 641041",
-    city: "Coimbatore",
+    city: "CBE",
     state: "Tamil Nadu",
     pincode: "641041",
   },
