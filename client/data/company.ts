@@ -1,6 +1,7 @@
 export const companyInfo = {
   name: "MindVisionTech Innovation",
   tagline: "Success Starts with One Decision",
+  website: "https://mindvisiontech.com",
   phone: "+91 93443 52881",
   phoneHref: "tel:+919344352881",
   email: "mindvisiontechinnovation@gmail.com",

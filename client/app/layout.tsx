@@ -29,8 +29,20 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://mindvisiontech.com"),
   title: `${companyInfo.name} | Embedded Systems, VLSI & AI Training`,
   description: `${companyInfo.tagline}. Build practical technology skills and start your engineering career with ${companyInfo.name}.`,
+  alternates: {
+    canonical: "https://mindvisiontech.com",
+  },
+  openGraph: {
+    title: `${companyInfo.name} | Embedded Systems, VLSI & AI Training`,
+    description: `${companyInfo.tagline}. Build practical technology skills and start your engineering career with ${companyInfo.name}.`,
+    url: "https://mindvisiontech.com",
+    siteName: companyInfo.name,
+    locale: "en_IN",
+    type: "website",
+  },
   icons: {
     icon: "/mindvisiontech-mark.svg",
     shortcut: "/mindvisiontech-mark.svg",
@@ -43,6 +55,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     "@context": "https://schema.org",
     "@type": "EducationalOrganization",
     name: companyInfo.name,
+    url: "https://mindvisiontech.com",
     telephone: companyInfo.phone,
     email: companyInfo.email,
     address: {

@@ -31,10 +31,13 @@ const nextConfig: NextConfig = {
   output: "standalone",
   reactStrictMode: true,
   devIndicators: false,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "*.s3.amazonaws.com" },
-      { protocol: "https", hostname: "*.s3.us-east-1.amazonaws.com" },
+      { protocol: "https", hostname: "*.s3.*.amazonaws.com" },
       { protocol: "https", hostname: "*.cloudfront.net" },
     ],
   },

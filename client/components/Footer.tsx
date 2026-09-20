@@ -26,7 +26,7 @@ export function Footer() {
 
           {/* Social Links */}
           <div className="pt-2">
-            <h4 className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-white/60">Follow Us</h4>
+            <h4 className="mb-2.5 text-xs font-semibold uppercase tracking-wider text-white">Follow Us</h4>
             <div className="flex items-center gap-3">
               {socialLinks.instagram && (
                 <a

@@ -1,24 +1,79 @@
 services:
+  # 1. MongoDB Database
   mongodb:
     image: mongo:8.0
     container_name: mindvisiontech-mongodb
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-mindvision_admin}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-change-me-in-local-env}
       MONGO_INITDB_DATABASE: mindvisiontech
     volumes:
       - mindvisiontech-mongodb-data:/data/db
+    networks:
+      - mindvisiontech-net
     healthcheck:
       test:
         - CMD-SHELL
-        - mongosh --quiet --username "$${MONGO_INITDB_ROOT_USERNAME}" --password "$${MONGO_INITDB_ROOT_PASSWORD}" --authenticationDatabase admin --eval "db.adminCommand('ping').ok" | grep 1
-      interval: 10s
+        - mongosh --quiet --eval "db.adminCommand('ping').ok" | grep 1
+      interval: 5s
       timeout: 5s
       retries: 5
-      start_period: 20s
+      start_period: 5s
+
+  # 2. Express REST API Backend
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: mindvisiontech-server
+    restart: unless-stopped
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:-mindvision_admin}:${MONGO_ROOT_PASSWORD:-change-me-in-local-env}@mongodb:27017/mindvisiontech?authSource=admin
+      CLIENT_URL: https://mindvisiontech.com
+      CORS_ORIGINS: https://mindvisiontech.com,https://www.mindvisiontech.com
+      AWS_REGION: ${AWS_REGION:-ap-south-1}
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME:-mindvisiontech-assets}
+      AWS_S3_BUCKET_DOMAIN: ${AWS_S3_BUCKET_DOMAIN:-mindvisiontech-assets.s3.ap-south-1.amazonaws.com}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+    networks:
+      - mindvisiontech-net
+
+  # 3. Next.js Frontend
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_BASE_URL: https://mindvisiontech.com/api
+        NEXT_PUBLIC_SITE_URL: https://mindvisiontech.com
+    container_name: mindvisiontech-client
+    restart: unless-stopped
+    depends_on:
+      - server
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_API_BASE_URL: https://mindvisiontech.com/api
+      NEXT_PUBLIC_SITE_URL: https://mindvisiontech.com
+    networks:
+      - mindvisiontech-net
 
 volumes:
   mindvisiontech-mongodb-data:
+
+networks:
+  mindvisiontech-net:
+    driver: bridge
