@@ -25,9 +25,11 @@ echo "===================================================================="
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] MindVisionTech Database Restoration & Migration"
 echo "===================================================================="
 
-# Load credentials
+# Load credentials safely (supporting quotes and URI special characters)
 if [ -f "${ENV_FILE}" ]; then
-    export $(grep -E '^(MONGO_ROOT_USERNAME|MONGO_ROOT_PASSWORD|MONGODB_URI)=' "${ENV_FILE}" | xargs)
+    set -a
+    source "${ENV_FILE}" 2>/dev/null || true
+    set +a
 fi
 
 # Locate latest backup file

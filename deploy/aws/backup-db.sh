@@ -37,13 +37,19 @@ echo "===================================================================="
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Starting Automated MongoDB Backup / Snapshot"
 echo "===================================================================="
 
-# 1. Load environment variables
+# 1. Load environment variables safely (supporting quotes and URI special characters)
 if [ -f "${ENV_FILE}" ]; then
-    export $(grep -E '^(MONGO_ROOT_USERNAME|MONGO_ROOT_PASSWORD|S3_BACKUP_BUCKET|MONGODB_URI)=' "${ENV_FILE}" | xargs)
+    set -a
+    source "${ENV_FILE}" 2>/dev/null || true
+    set +a
 elif [ -f "${APP_DIR}/server/.env" ]; then
-    export $(grep -E '^(MONGO_ROOT_USERNAME|MONGO_ROOT_PASSWORD|S3_BACKUP_BUCKET|MONGODB_URI)=' "${APP_DIR}/server/.env" | xargs)
+    set -a
+    source "${APP_DIR}/server/.env" 2>/dev/null || true
+    set +a
 elif [ -f "${APP_DIR}/.env" ]; then
-    export $(grep -E '^(MONGO_ROOT_USERNAME|MONGO_ROOT_PASSWORD|S3_BACKUP_BUCKET|MONGODB_URI)=' "${APP_DIR}/.env" | xargs)
+    set -a
+    source "${APP_DIR}/.env" 2>/dev/null || true
+    set +a
 fi
 
 CONTAINER_NAME="mindvisiontech-mongodb-prod"
