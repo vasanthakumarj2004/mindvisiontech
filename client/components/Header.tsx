@@ -43,7 +43,7 @@ function TopInfoStrip() {
 function CertificationBadges() {
   const badges = [
     {
-      title: "ISO 9001:2025",
+      title: "ISO 9001:2015",
       subtitle: "Certified Training",
       icon: ShieldCheck,
       color: "text-blue-700 bg-blue-50 border-blue-200",
