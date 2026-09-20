@@ -61,53 +61,40 @@ The web platform provides student enrollment, dynamic course syllabi, physical b
 
 ```mermaid
 flowchart TD
-    subgraph Clients["End Users & Clients"]
-        Browser["Desktop & Mobile Browsers<br/>(HTTPS)"]
-    end
+    Users["End Users (Browsers & Mobile)"]
 
-    subgraph AWS_Cloud["Amazon Web Services (Region: ap-south-1 Mumbai)"]
-        subgraph DNS_SSL["DNS & Edge Security"]
-            R53["AWS Route 53<br/>mindvisiontech.com"]
-            ACM["AWS Certificate Manager<br/>(TLS 1.3 / Auto-Renewing SSL)"]
-        end
-
-        subgraph Ingress["Public Ingress Layer"]
-            ALB["AWS Application Load Balancer (ALB)<br/>• Port 443 Ingress (SSL Termination)<br/>• Port 80 Ingress (Auto-Redirect to 443)<br/>• Target Group Health Check: HTTP /api/health"]
-        end
-
-        subgraph Compute["AWS EC2 Host (Ubuntu 24.04 LTS)"]
-            NGINX["NGINX Web Server (Port 80)<br/>• Reverse Proxy: /api/* -> 127.0.0.1:5000<br/>• Static File Server: /var/www/mindvisiontech/out<br/>• Gzip Compression & 30-Day Asset Caching"]
-            
-            subgraph Docker_Bridge["Docker Internal Bridge Network"]
-                API["Container: mindvisiontech-api-prod<br/>(Node.js 20 LTS + Express.js)<br/>Port: 127.0.0.1:5000"]
-                FallbackDB["Container: mindvisiontech-mongodb-prod<br/>(Mongo 7.0 Engine - Disabled when Atlas Active)<br/>Volume: mindvisiontech-mongodb-data"]
-            end
-
-            Systemd["systemd Daemon: mindvisiontech.service<br/>(Auto-boot on EC2 start/restart)"]
-            Swap["2 GB Linux Swapfile<br/>(OOM Guard for 1 GB RAM Host)"]
+    subgraph AWS["AWS Cloud (ap-south-1 Mumbai)"]
+        R53["AWS Route 53 (DNS)"]
+        ACM["AWS Certificate Manager (ACM TLS 1.3)"]
+        ALB["Application Load Balancer (ALB)"]
+        
+        subgraph EC2["EC2 Instance (Ubuntu 24.04 LTS)"]
+            NGINX["NGINX Web Server (Port 80)"]
+            API["Docker: Express API (Port 5000)"]
+            FallbackDB["Fallback Docker: MongoDB 7.0"]
+            Systemd["systemd: mindvisiontech.service"]
+            Swap["2 GB Linux Swapfile"]
         end
     end
 
-    subgraph External_Database["Managed Cloud Persistence"]
-        Atlas[("MongoDB Atlas M0 Free Tier / M10<br/>AWS ap-south-1 Mumbai<br/>• Replica Set (Primary + 2 Secondaries)<br/>• Automated TLS Encryption & Backups")]
+    subgraph DB["Database Layer"]
+        Atlas["MongoDB Atlas M0 Free Tier (AWS Mumbai)"]
     end
 
-    subgraph CI_CD["Continuous Deployment (CI/CD)"]
-        GitHub["GitHub Repository<br/>(vasanthakumarj2004/mindvisiontech)"]
-        GHA["GitHub Actions Runner<br/>• Vitest Test Suites (26/26 Passing)<br/>• Fast Static Next.js Compile (~12s)<br/>• Tarball SCP Transfer (~2s)"]
+    subgraph CI["CI/CD Automation"]
+        GHA["GitHub Actions Runner"]
     end
 
-    Browser -->|1. Resolve DNS| R53
-    R53 -->|2. Route Traffic| ALB
-    ACM -.->|Terminates SSL| ALB
-    ALB -->|3. HTTP Forward (Port 80)| NGINX
-    NGINX -->|4a. Static Web Pages| Browser
-    NGINX -->|4b. Reverse Proxy /api/*| API
-    API -->|5. Mongoose Connection String (TLS)| Atlas
-    API -.->|Fallback Connection| FallbackDB
+    Users -->|"1. HTTPS Request (mindvisiontech.com)"| R53
+    R53 -->|"2. Forward to ALB"| ALB
+    ACM -.->|"Terminates SSL 443"| ALB
+    ALB -->|"3. Forward HTTP 80"| NGINX
+    NGINX -->|"4a. Serve Static Web Pages"| Users
+    NGINX -->|"4b. Reverse Proxy API Requests"| API
+    API -->|"5. Secure TLS Queries"| Atlas
+    API -.->|"Fallback if Atlas Inactive"| FallbackDB
 
-    GitHub -->|git push origin main| GHA
-    GHA -->|SSH: Pre-built frontend + Docker Hot-Swap| Compute
+    GHA -->|"git push: Pre-built Frontend & Container Swap"| NGINX
 ```
 
 ---
@@ -168,8 +155,7 @@ sequenceDiagram
     Runner->>EC2: Copy tarball via appleboy/scp-action (~2s)
     Runner->>EC2: Execute update-prod.sh via appleboy/ssh-action
     
-    rect rgb(240, 248, 255)
-    Note over EC2: Atomic Server-Side Execution (< 15s)
+    Note over EC2: Atomic Server-Side Hot-Swap (under 15s)
     EC2->>EC2: Run deploy/aws/backup-db.sh (Hot snapshot)
     EC2->>Docker: Tag current image as mindvisiontech-api:previous
     EC2->>EC2: Extract frontend-dist.tar.gz to /var/www/mindvisiontech/out (0.5s)
@@ -180,12 +166,11 @@ sequenceDiagram
     alt Healthcheck Passes (HTTP 200)
         EC2->>Docker: docker image prune -f (Remove older unused images)
         EC2->>Nginx: systemctl reload nginx (Graceful reload)
-        EC2-->>Runner: Deployment Succeeded!
+        EC2-->>Runner: Deployment Succeeded in under 45s!
     else Healthcheck Fails
         EC2->>Docker: Rollback to mindvisiontech-api:previous
         EC2->>EC2: git checkout previous commit
         EC2-->>Runner: Deployment Aborted & Rolled Back!
-    end
     end
 ```
 

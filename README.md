@@ -21,49 +21,40 @@ The production deployment utilizes an **AWS Application Load Balancer (ALB)** wi
 
 ```mermaid
 flowchart TD
-    Users["End Users (Web & Mobile)"]
+    Users["End Users (Browsers & Mobile)"]
 
-    subgraph AWS_Cloud["Amazon Web Services (Region: ap-south-1 Mumbai)"]
-        subgraph DNS_SSL["DNS & SSL/TLS Layer"]
-            R53["AWS Route 53<br/>mindvisiontech.com & www"]
-            ACM["AWS Certificate Manager (ACM)<br/>Wildcard TLS 1.3 Certificate"]
-        end
-
-        subgraph Ingress["Load Balancing Ingress"]
-            ALB["AWS Application Load Balancer (ALB)<br/>• Port 443 Ingress (Terminates SSL)<br/>• Port 80 Ingress (Redirects to 443)<br/>• Target Group Health Check: HTTP /api/health"]
-        end
-
-        subgraph Host["EC2 Host Instance (Ubuntu Linux)"]
-            NGINX["NGINX Web Server (Port 80)<br/>• Serves Static Next.js Pages (/var/www/mindvisiontech/out)<br/>• Reverse Proxy: /api/* -> 127.0.0.1:5000<br/>• Gzip Compression & 30-Day Static Caching"]
-            
-            subgraph Docker_Engine["Docker Engine"]
-                API["Container: mindvisiontech-api-prod<br/>(Node.js 20 LTS + Express REST API)<br/>Port: 127.0.0.1:5000"]
-                LocalMongo["Container: mindvisiontech-mongodb-prod<br/>(Local Mongo 7.0 - Automatically stopped when Atlas is active)"]
-            end
-
-            Systemd["systemd Daemon: mindvisiontech.service<br/>(Auto-boot on EC2 stop/start or reboot)"]
-            Swap["2 GB Linux Swap Memory<br/>(OOM Guard for 1 GB RAM Host)"]
+    subgraph AWS["AWS Cloud (ap-south-1 Mumbai)"]
+        R53["AWS Route 53 (DNS)"]
+        ACM["AWS Certificate Manager (ACM TLS 1.3)"]
+        ALB["Application Load Balancer (ALB)"]
+        
+        subgraph EC2["EC2 Instance (Ubuntu 24.04 LTS)"]
+            NGINX["NGINX Web Server (Port 80)"]
+            API["Docker: Express API (Port 5000)"]
+            LocalMongo["Fallback Docker: MongoDB 7.0"]
+            Systemd["systemd: mindvisiontech.service"]
+            Swap["2 GB Linux Swapfile"]
         end
     end
 
-    subgraph Cloud_DB["Managed Cloud Persistence Layer"]
-        Atlas[("MongoDB Atlas M0 Free Tier / M10<br/>AWS ap-south-1 Mumbai<br/>• Multi-AZ Replica Set<br/>• Automated Backups & Monitoring")]
+    subgraph DB["Database Layer"]
+        Atlas["MongoDB Atlas M0 Free Tier (AWS Mumbai)"]
     end
 
-    subgraph CI_CD["Automated Continuous Deployment"]
-        GitHub["GitHub Actions Runner<br/>1. Vitest Test Suites (26/26 Passing)<br/>2. Pre-builds Static Frontend (~12s)<br/>3. SCP Transfer to EC2 (~2s)<br/>4. SSH Hot-Swap & Auto-Rollback (~15s)"]
+    subgraph CI["CI/CD Automation"]
+        GHA["GitHub Actions Runner"]
     end
 
-    Users -->|1. HTTPS Request| R53
-    R53 --> ALB
-    ACM -.->|Terminates SSL| ALB
-    ALB -->|2. Forward Port 80| NGINX
-    NGINX -->|3a. Serve Static Pages| Users
-    NGINX -->|3b. Proxy /api/*| API
-    API -->|4. Query Data (TLS)| Atlas
-    API -.->|Fallback Connection| LocalMongo
+    Users -->|"1. HTTPS Request (mindvisiontech.com)"| R53
+    R53 -->|"2. Forward to ALB"| ALB
+    ACM -.->|"Terminates SSL 443"| ALB
+    ALB -->|"3. Forward HTTP 80"| NGINX
+    NGINX -->|"4a. Serve Static Web Pages"| Users
+    NGINX -->|"4b. Reverse Proxy API Requests"| API
+    API -->|"5. Secure TLS Queries"| Atlas
+    API -.->|"Fallback if Atlas Inactive"| LocalMongo
 
-    GitHub -->|git push origin main| Host
+    GHA -->|"git push: Pre-built Frontend & Container Swap"| NGINX
 ```
 
 ---
@@ -238,7 +229,7 @@ sequenceDiagram
     EC2->>EC2: Extract Static Bundle to /var/www/mindvisiontech/out (0.5s)
     EC2->>Docker: Build new API image & Hot-Swap container
     EC2->>Docker: Verify http://127.0.0.1:5000/api/health (200 OK)
-    EC2-->>Runner: Deployment Succeeded in < 45s!
+    EC2-->>Runner: Deployment Succeeded in under 45s!
 ```
 
 ### Required GitHub Secrets
