@@ -26,12 +26,8 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-<<<<<<< HEAD
-    "eslint": "^10.10.0",
-=======
     "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^9",
->>>>>>> 90d776bfcde4cef6d8d081326a5cde85725f725a
     "eslint-config-next": "16.3.4",
     "jsdom": "^29.1.1",
     "tailwindcss": "^4",

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Mail, Phone, Award, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Mail, Phone } from "lucide-react";
 import { companyInfo } from "@/data/company";
 import { Navbar } from "@/components/Navbar";
 import { MindVisionLogo } from "@/components/MindVisionLogo";
@@ -39,49 +39,13 @@ function TopInfoStrip() {
   );
 }
 
-// ─── 2. MAIN HEADER (WHITE BACKGROUND) ──────────────────────────────────────
-function CertificationBadges() {
-  const badges = [
-    {
-      title: "ISO 9001:2015",
-      subtitle: "Certified Training",
-      icon: ShieldCheck,
-      color: "text-blue-700 bg-blue-50 border-blue-200",
-    },
-  ];
-
-  return (
-    <div className="hidden md:flex items-center gap-3">
-      {badges.map((b) => {
-        const Icon = b.icon;
-        return (
-          <div
-            key={b.title}
-            className={`flex items-center gap-2.5 rounded-lg border px-3 py-1.5 shadow-2xs transition-transform hover:-translate-y-0.5 ${b.color}`}
-          >
-            <Icon className="h-5 w-5 shrink-0" />
-            <div className="leading-tight text-left">
-              <div className="text-[11px] font-black tracking-tight uppercase">
-                {b.title}
-              </div>
-              <div className="text-[9px] font-bold opacity-80 uppercase tracking-wider">
-                {b.subtitle}
-              </div>
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
 export function Header() {
   return (
     <header className="w-full">
       {/* 1. Top Info Strip */}
       <TopInfoStrip />
 
-      {/* 2. Main Header: White Background with Logo & Certification Badges */}
+      {/* 2. Main Header: White Background with Logo */}
       <div className="w-full bg-white border-b border-slate-100">
         <div className="mx-auto flex max-w-[1550px] items-center justify-between px-4 py-2 sm:px-6 lg:px-8">
           {/* Logo */}
@@ -92,9 +56,6 @@ export function Header() {
           >
             <MindVisionLogo className="h-auto w-60 sm:w-72 lg:w-[340px] xl:w-[360px]" />
           </Link>
-
-          {/* Right side: 3 certification/partner badges */}
-          <CertificationBadges />
         </div>
       </div>
 

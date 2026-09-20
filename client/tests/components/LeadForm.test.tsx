@@ -5,6 +5,8 @@ import { LeadForm } from '@/components/LeadForm';
 describe('LeadForm Component', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
+    // jsdom doesn't implement window.open — stub it to prevent unhandled errors
+    vi.stubGlobal('open', vi.fn());
   });
 
   it('should render form input fields and submit buttons', () => {
