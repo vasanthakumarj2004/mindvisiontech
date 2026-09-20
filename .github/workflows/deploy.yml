@@ -33,14 +33,41 @@ jobs:
         run: npm test
 
   # ----------------------------------------------------------------------------
-  # Stage 2: Deploy to EC2 via SSH (Zero-Downtime Hot Reload)
+  # Stage 2: Fast Optimized Deploy to EC2
+  # Builds static assets on fast GitHub runner, copies bundle via SCP,
+  # and triggers zero-downtime Docker Compose hot-swap on EC2.
   # ----------------------------------------------------------------------------
   deploy:
     name: Deploy to EC2
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - name: Execute Update on EC2 via SSH
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Pre-build Static Frontend on Runner
+        run: |
+          npm --prefix client ci
+          NEXT_PUBLIC_API_URL="/api" npm --prefix client run build:static
+          tar -czf frontend-dist.tar.gz -C client/out .
+
+      - name: Transfer Pre-built Frontend Bundle to EC2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER || 'ubuntu' }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: ${{ secrets.EC2_PORT || 22 }}
+          source: "frontend-dist.tar.gz"
+          target: "/tmp"
+
+      - name: Execute Zero-Downtime Docker Deployment on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}

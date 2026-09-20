@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # MindVisionTech Production EC2 Application Startup & Self-Healing Script
-# Checks all system prerequisites, starts Docker containers (API + MongoDB),
+# Checks all system prerequisites, starts Docker containers (API + MongoDB/Atlas),
 # builds/verifies frontend, links NGINX, and registers systemd auto-start on boot.
 # ==============================================================================
 
@@ -95,20 +95,27 @@ else
     echo "Existing .env.production found. Preserving current secrets."
 fi
 
-# 5. DOCKER CONTAINERS STARTUP (API + MONGODB)
-echo "--> [5/7] Starting Docker containers (MongoDB & Express API)..."
-docker compose --env-file "${ENV_FILE}" -f docker-compose.prod.yml up -d --build
+# 5. DOCKER CONTAINERS STARTUP (API + MONGODB/ATLAS)
+echo "--> [5/7] Starting Docker containers..."
+if grep -q "mongodb+srv://" "${ENV_FILE}" 2>/dev/null; then
+    echo "MongoDB Atlas detected in .env.production. Launching API container only..."
+    docker stop mindvisiontech-mongodb-prod 2>/dev/null || true
+    docker compose --env-file "${ENV_FILE}" -f docker-compose.prod.yml up -d --build api
+else
+    echo "Local MongoDB detected. Launching MongoDB and API containers..."
+    docker compose --env-file "${ENV_FILE}" -f docker-compose.prod.yml up -d --build
+fi
 
 # 6. FRONTEND STATIC BUILD CHECK
 echo "--> [6/7] Verifying Next.js static build in /var/www/mindvisiontech/out..."
-mkdir -p /var/www/mindvisiontech
+mkdir -p /var/www/mindvisiontech/out
 if [ ! -f /var/www/mindvisiontech/out/index.html ]; then
     echo "Building static frontend..."
     cd "${APP_DIR}/client"
-    npm ci
-    NEXT_PUBLIC_API_URL="/api" npm run build:static
-    rm -rf /var/www/mindvisiontech/out
-    cp -r "${APP_DIR}/client/out" /var/www/mindvisiontech/out
+    npm ci --prefer-offline || npm install
+    NODE_OPTIONS="--max-old-space-size=1536" NEXT_PUBLIC_API_URL="/api" npm run build:static
+    rm -rf /var/www/mindvisiontech/out/*
+    cp -r "${APP_DIR}/client/out/." /var/www/mindvisiontech/out/
 fi
 chown -R www-data:www-data /var/www/mindvisiontech
 cd "${APP_DIR}"
