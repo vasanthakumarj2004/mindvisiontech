@@ -23,7 +23,7 @@ const serviceDetails = [
       "Building & consuming RESTful APIs with Django REST Framework",
       "Database integration with PostgreSQL/MySQL & Web Technologies",
     ],
-    image: "https://images.unsplash.com/photo-1526379095098-d400fd0bf935?auto=format&fit=crop&w=900&q=80",
+    image: "/images/services/python-full-stack.jpg",
   },
   {
     slug: "java-full-stack-developer",
@@ -38,7 +38,7 @@ const serviceDetails = [
       "Spring Framework & Spring Boot microservices architecture",
       "Web Technologies, RESTful APIs, & database connectivity",
     ],
-    image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=900&q=80",
+    image: "/images/services/java-full-stack.jpg",
   },
   {
     slug: "net-full-stack",
@@ -53,7 +53,7 @@ const serviceDetails = [
       "ADO.NET, Entity Framework, & SQL Server database operations",
       "Building secure REST APIs & modern web user interfaces",
     ],
-    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=900&q=80",
+    image: "/images/services/dotnet-full-stack.jpg",
   },
   {
     slug: "embedded-systems",
@@ -68,7 +68,7 @@ const serviceDetails = [
       "Embedded Linux kernel cross-compilation & Yocto project",
       "Hands-on hardware labs with STM32, ESP32, and Raspberry Pi Pico",
     ],
-    image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=900&q=80",
+    image: "/images/services/embedded-systems.jpg",
   },
   {
     slug: "vlsi-design",
@@ -83,7 +83,7 @@ const serviceDetails = [
       "Xilinx Vivado & ModelSim lab setups",
       "Static timing analysis (STA) and setup/hold violation fixes",
     ],
-    image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=900&q=80",
+    image: "/images/services/vlsi-design.jpg",
   },
   {
     slug: "pcb-design",
@@ -98,7 +98,7 @@ const serviceDetails = [
       "Ground plane separation, EMI reduction, and thermal relief",
       "Gerber generation and ordering physical boards from fabs",
     ],
-    image: "https://images.unsplash.com/photo-1553406830-ef2513450d76?auto=format&fit=crop&w=900&q=80",
+    image: "/images/services/pcb-design.jpg",
   },
   {
     slug: "industrial-automation",
@@ -113,7 +113,7 @@ const serviceDetails = [
       "Industrial IoT protocols: Modbus TCP, MQTT, OPC-UA",
       "ROS2 (Robot Operating System) navigation & Gazebo simulation",
     ],
-    image: "https://images.unsplash.com/photo-1535378917042-10a22c95931a?auto=format&fit=crop&w=900&q=80",
+    image: "/images/services/industry-4-automation.jpg",
   },
   {
     slug: "edge-ai",
@@ -128,7 +128,7 @@ const serviceDetails = [
       "Keyword spotting and gesture recognition on Cortex-M",
       "NVIDIA Jetson Nano CUDA-accelerated vision pipelines",
     ],
-    image: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?auto=format&fit=crop&w=900&q=80",
+    image: "/images/services/ai-ml-edge.jpg",
   },
   {
     slug: "corporate-training",
@@ -143,7 +143,7 @@ const serviceDetails = [
       "Pre and post-training competency assessments",
       "Dedicated corporate mentorship and project reviews",
     ],
-    image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=900&q=80",
+    image: "/images/services/corporate-training.jpg",
   },
 ];
 

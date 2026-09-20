@@ -16,7 +16,28 @@ const router = Router();
 router.post(
   '/',
   leadSubmissionLimiter,
-  [body('name').trim().notEmpty(), body('email').isEmail(), body('phone').trim().notEmpty()],
+  [
+    body('name')
+      .trim()
+      .notEmpty().withMessage('Name is required')
+      .isLength({ max: 100 }).withMessage('Name cannot exceed 100 characters')
+      .escape(),
+    body('email')
+      .trim()
+      .isEmail().withMessage('Valid email address is required')
+      .normalizeEmail(),
+    body('phone')
+      .trim()
+      .notEmpty().withMessage('Phone number is required')
+      .isLength({ min: 10, max: 20 }).withMessage('Phone number must be between 10 and 20 digits'),
+    body('message')
+      .optional()
+      .trim()
+      .isLength({ max: 1000 }).withMessage('Message cannot exceed 1000 characters')
+      .escape(),
+    body('course').optional().isMongoId().withMessage('Invalid course ID'),
+    body('branch').optional().isMongoId().withMessage('Invalid branch ID')
+  ],
   validate,
   postLead
 );

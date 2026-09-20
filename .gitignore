@@ -13,3 +13,6 @@ server/.env.*
 !server/.env.example
 !server/.env.docker.example
 npm-debug.log*
+backups/*.archive.gz
+backups/*.log
+deploy/aws/*.log

@@ -93,7 +93,7 @@ export default function AboutPage() {
           </div>
           <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl shadow-blue-xl h-64 sm:h-[400px]">
             <Image
-              src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1000&q=85"
+              src="/images/about/team-collaboration.jpg"
               alt="MindVisionTech students collaborating in a hardware lab"
               width={700}
               height={500}
