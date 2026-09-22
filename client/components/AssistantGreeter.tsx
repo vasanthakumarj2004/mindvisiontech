@@ -95,8 +95,10 @@ export function AssistantGreeter() {
 
   // Hydrate greeting client-side only (avoids SSR mismatch)
   useEffect(() => {
-    setGreeting(getTimeGreeting());
-    setMounted(true);
+    queueMicrotask(() => {
+      setGreeting(getTimeGreeting());
+      setMounted(true);
+    });
   }, []);
 
   // Rotate copy lines

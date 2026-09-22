@@ -274,7 +274,7 @@ export function Hero3DModel() {
 
     // ─── Animation Loop ───────────────────────────────────────────────────────
     let animationFrameId: number;
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);

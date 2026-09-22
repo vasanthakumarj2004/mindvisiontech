@@ -31,7 +31,7 @@ export function PageHero({ eyebrow, heading, subheading, aside }: PageHeroProps)
   const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
-    setMounted(true);
+    queueMicrotask(() => setMounted(true));
   }, []);
 
   const fadeUp = (delayS: number) =>

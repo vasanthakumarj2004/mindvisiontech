@@ -33,9 +33,6 @@ const nextConfig: NextConfig = {
   output: isExport ? "export" : "standalone",
   reactStrictMode: true,
   devIndicators: false,
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
     unoptimized: isExport,
     remotePatterns: [

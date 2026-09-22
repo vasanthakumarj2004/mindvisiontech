@@ -19,13 +19,14 @@ import {
   Building2,
   Sparkles,
   ArrowUpRight,
+  type LucideIcon,
 } from "lucide-react";
 
 interface SubItem {
   label: string;
   href: string;
   description?: string;
-  icon?: any;
+  icon?: LucideIcon;
 }
 
 interface NavItem {
@@ -51,8 +52,10 @@ export function Navbar() {
   const dropdownTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    setIsMenuOpen(false);
-    setActiveDropdown(null);
+    queueMicrotask(() => {
+      setIsMenuOpen(false);
+      setActiveDropdown(null);
+    });
   }, [pathname]);
 
   function isActive(item: NavItem): boolean {

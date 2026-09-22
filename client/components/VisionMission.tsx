@@ -38,7 +38,7 @@ function VMCard({
 
   // Mounted guard: same pattern used in PageHero to prevent opacity-0 freeze
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  useEffect(() => queueMicrotask(() => setMounted(true)), []);
 
   const animProps = prefersReducedMotion || !mounted
     ? { opacity: 1, y: 0 }
