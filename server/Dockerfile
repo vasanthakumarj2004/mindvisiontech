@@ -1,21 +1,3 @@
-<<<<<<< HEAD
-# Dockerfile for MindVisionTech Express Server
-FROM node:20-alpine AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV PORT=5000
-
-# Install dependencies first for optimal caching
-COPY package.json package-lock.json ./
-RUN npm ci --omit=dev
-
-# Copy server application source
-COPY . .
-
-EXPOSE 5000
-
-=======
 # ==========================================
 # Production Dockerfile for MindVisionTech API
 # ==========================================
@@ -44,5 +26,4 @@ EXPOSE 5000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD curl -f http://localhost:5000/api/health || exit 1
 
->>>>>>> 90d776bfcde4cef6d8d081326a5cde85725f725a
 CMD ["node", "server.js"]
