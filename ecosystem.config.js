@@ -1,56 +1,28 @@
 module.exports = {
   apps: [
     {
-<<<<<<< HEAD
-=======
-      name: 'mindvisiontech-server',
-      script: 'server.js',
-      cwd: './server',
-      instances: 'max',
-      exec_mode: 'cluster',
-      env: {
+      name: 'api-server',            // Name shown in `pm2 list`
+      script: 'server.js',           // Script entry point
+      cwd: './backend',              // Working directory
+      instances: 'max',              // Run on all CPU cores
+      exec_mode: 'cluster',          // Load balancer mode
+      env: {                         // Environment variables
         NODE_ENV: 'production',
         PORT: 5000,
       },
-      watch: false,
-      autorestart: true,
-      max_restarts: 10,
-      restart_delay: 3000,
-      exp_backoff_restart_delay: 1000,
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      max_restarts: 10,              // Stop retrying after 10 crashes
+      restart_delay: 3000,           // Wait 3 seconds before restart
+      log_date_format: 'YYYY-MM-DD', // Timestamp format in logs
     },
     {
->>>>>>> 90d776bfcde4cef6d8d081326a5cde85725f725a
-      name: 'mindvisiontech-client',
+      name: 'web-client',
       script: 'npm',
-      args: 'run start --prefix client',
-      cwd: __dirname,
+      args: 'start',
+      cwd: './frontend',
       instances: 1,
       env: {
-        NODE_ENV: 'production',
         PORT: 3000,
       },
-      watch: false,
-      autorestart: true,
-      max_restarts: 10,
-      restart_delay: 3000,
-      exp_backoff_restart_delay: 1000,
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-    },
-    {
-      name: 'mindvisiontech-server',
-      script: 'server.js',
-      cwd: `${__dirname}/server`,
-      env: {
-        NODE_ENV: 'production',
-        PORT: 5000,
-      },
-      watch: false,
-      autorestart: true,
-      max_restarts: 10,
-      restart_delay: 3000,
-      exp_backoff_restart_delay: 1000,
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
     },
   ],
 };
