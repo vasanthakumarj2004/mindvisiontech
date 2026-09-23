@@ -1,10 +1,19 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # ==============================================================================
 # MindVisionTech - Dockerized EC2 Ubuntu Setup Script
 # Domain: mindvisiontech.com
 # ==============================================================================
 
-set -e
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+APP_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+TARGET_USER="${SUDO_USER:-${USER:-ubuntu}}"
+
+if [[ ! -f "${APP_DIR}/deploy/nginx/mindvisiontech.conf" ]]; then
+    echo "ERROR: Nginx config not found at ${APP_DIR}/deploy/nginx/mindvisiontech.conf" >&2
+    exit 1
+fi
 
 echo ">>> [1/5] Updating system packages & installing dependencies..."
 sudo apt update && sudo apt upgrade -y
@@ -20,11 +29,10 @@ if [ ! -f /swapfile ]; then
 fi
 
 echo ">>> [3/5] Adding current user to docker group..."
-sudo usermod -aG docker $USER
+sudo usermod -aG docker "${TARGET_USER}"
 
 echo ">>> [4/5] Configuring Nginx reverse proxy for mindvisiontech.com..."
-APP_DIR=$(pwd)
-sudo cp "$APP_DIR/deploy/nginx/mindvisiontech.conf" /etc/nginx/sites-available/mindvisiontech
+sudo cp "${APP_DIR}/deploy/nginx/mindvisiontech.conf" /etc/nginx/sites-available/mindvisiontech
 sudo ln -sf /etc/nginx/sites-available/mindvisiontech /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t
