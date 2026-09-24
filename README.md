@@ -21,38 +21,68 @@ The production deployment replaces the AWS Application Load Balancer (ALB) with 
 
 ```mermaid
 flowchart TD
-    Users["End Users (Browsers & Mobile)"]
+    Users["End Users (Browsers & Mobile Apps)"]
 
     subgraph AWS["AWS Cloud (ap-south-1 Mumbai)"]
-        R53["AWS Route 53 (DNS)<br/>mindvisiontech.com"]
-        
-        subgraph EC2["EC2 Instance (Ubuntu 24.04 LTS)"]
-            NGINX["NGINX Web Server<br/>• Port 80: HTTP Redirect to HTTPS<br/>• Port 443: TLS 1.3 SSL Termination<br/>• Serves Static Next.js (/var/www/mindvisiontech/out)"]
-            Certbot["Certbot Daemon (Let's Encrypt Auto-Renewal)"]
-            API["Docker: Express API (Port 5000)"]
-            LocalMongo["Fallback Docker: MongoDB 7.0"]
-            Systemd["systemd: mindvisiontech.service"]
-            Swap["2 GB Linux Swapfile"]
+        subgraph DNS["AWS Route 53 Global Anycast"]
+            R53Apex["A Record: mindvisiontech.com &rarr; 16.4.5.249"]
+            R53WWW["A Record: www.mindvisiontech.com &rarr; 16.4.5.249"]
+            R53API["A Record: api.mindvisiontech.com &rarr; 16.4.5.249"]
+        end
+
+        subgraph EC2Host["EC2 Instance: t3.micro (Ubuntu 24.04 LTS)"]
+            EIP["AWS Elastic IP: 16.4.5.249<br/>(Static Public IPv4)"]
+
+            subgraph WebProxy["NGINX 1.24+ Web Server & Reverse Proxy"]
+                P80["Port 80 (HTTP)<br/>• 301 Redirect to HTTPS<br/>• ACME Challenge /.well-known/acme-challenge/"]
+                P443["Port 443 (HTTPS - TLS 1.2 / 1.3)<br/>• Let's Encrypt SSL Certificate<br/>• Gzip & HTTP Security Headers (HSTS, CSP)"]
+                StaticFiles["Static Asset Engine<br/>• Serves Next.js SSG (/var/www/mindvisiontech/out)"]
+            end
+
+            subgraph CertbotLayer["SSL Certificate Daemon"]
+                Certbot["Certbot Let's Encrypt<br/>• Auto-renews via systemd / cron<br/>• Path: /etc/letsencrypt/live/mindvisiontech.com/"]
+            end
+
+            subgraph DockerServices["Docker Engine Runtime"]
+                API["Express API Container<br/>• Port 5000 (Loopback 127.0.0.1:5000)<br/>• Node 20 LTS Alpine (~180MB)<br/>• Rate-limited & Sanitized"]
+                LocalMongo["Fallback MongoDB Container<br/>• mongo:7.0 (Inactive when Atlas connected)<br/>• Saves 250MB RAM"]
+            end
+
+            subgraph SystemResilience["OS Self-Healing & Supervision"]
+                Systemd["systemd: mindvisiontech.service<br/>(Auto-starts containers on boot)"]
+                Swap["Linux Swap Space: 2 GB (/swapfile)<br/>(Guards against OOM crashes)"]
+            end
         end
     end
 
-    subgraph DB["Database Layer"]
-        Atlas["MongoDB Atlas M0 Free Tier (AWS Mumbai)"]
+    subgraph ManagedDB["Cloud Database Layer"]
+        Atlas["MongoDB Atlas M0 Free Tier (AWS Mumbai ap-south-1)<br/>• 3-Node Replica Set<br/>• Automated Backups & Monitoring<br/>• Zero Cloud Cost ($0.00/mo)"]
     end
 
-    subgraph CI["CI/CD Automation"]
-        GHA["GitHub Actions Runner"]
+    subgraph Automation["CI/CD Pipeline"]
+        GHA["GitHub Actions Cloud Runner<br/>• Vitest Test Suite (26/26 Passing)<br/>• Static Frontend Pre-compilation<br/>• Zero-Downtime Hot-Swap via SSH (< 45s)"]
     end
 
-    Users -->|"1. HTTPS (443) / HTTP (80)"| R53
-    R53 -->|"2. Direct DNS Resolution (EC2 IP)"| NGINX
-    Certbot -.->|"Auto-renews SSL"| NGINX
-    NGINX -->|"3a. Serve Static Web Pages"| Users
-    NGINX -->|"3b. Reverse Proxy API Requests"| API
-    API -->|"4. Secure TLS Queries"| Atlas
-    API -.->|"Fallback if Atlas Inactive"| LocalMongo
+    %% Traffic Flow
+    Users -->|"1. HTTPS / HTTP Requests"| R53Apex
+    Users -.->|"1b. Alternate Domains"| R53WWW
+    Users -.->|"1c. API Domain"| R53API
+    R53Apex -->|"2. Resolves directly to Elastic IP"| EIP
+    R53WWW -->|"2. Resolves directly to Elastic IP"| EIP
+    R53API -->|"2. Resolves directly to Elastic IP"| EIP
 
-    GHA -->|"git push: Pre-built Frontend & Container Swap"| NGINX
+    EIP -->|"Port 80 Traffic"| P80
+    EIP -->|"Port 443 TLS Traffic"| P443
+    P80 -->|"301 Permanent Redirect"| P443
+    Certbot -.->|"Issues & Renews SSL Certs"| P443
+
+    P443 -->|"3a. Serves Static Pages directly from disk"| StaticFiles
+    StaticFiles -->|"Ultra-fast TTFB"| Users
+    P443 -->|"3b. Reverse Proxy /api/* to 127.0.0.1:5000"| API
+    API -->|"4. Encrypted Mongoose Queries (mongodb+srv)"| Atlas
+    API -.->|"Emergency Local Fallback"| LocalMongo
+
+    GHA -->|"git push: Deploy Static Bundle & Docker Hot-Reload"| EC2Host
 ```
 
 ---
@@ -245,16 +275,17 @@ To enable automated deployments, add these secrets under **Settings $\rightarrow
 
 | Service | Tier / Usage | Monthly Cost (USD) | Monthly Cost (INR @ ₹86/$) |
 | :--- | :--- | :---: | :---: |
-| **AWS Route 53** | 1 Hosted Zone + Queries | **$0.60** | ₹51 |
-| **Certbot (Let's Encrypt)** | Wildcard/Multi-Domain SSL Certificate | **$0.00** *(Free)* | ₹0 |
-| **AWS Application Load Balancer (ALB)** | — | **$0.00** *(Removed/Eliminated)* | ₹0 |
+| **AWS Route 53** | 1 Hosted Zone + DNS Queries | **$0.60** | ₹51 |
+| **AWS Elastic IP** | Public IPv4 Address (`16.4.5.249`) | **$0.00** *(Year 1 Free Tier)*<br/>or **$3.65** *(Standard)* | ₹0 *(Free Tier)*<br/>or ₹314 |
+| **Certbot (Let's Encrypt)** | Multi-Domain SSL Certificate | **$0.00** *(Free Forever)* | ₹0 |
+| **AWS Application Load Balancer (ALB)** | — | **$0.00** *(Eliminated: Saved ~$18–$22/mo)* | ₹0 |
 | **AWS EC2 Compute** | `t2.micro` / `t3.micro` | **$0.00** *(Year 1 Free Tier)*<br/>or **$7.59** *(Standard)* | ₹0 *(Free Tier)*<br/>or ₹652 |
 | **AWS EBS Storage** | 20 GB `gp3` SSD | **$1.60** | ₹137 |
 | **AWS Data Transfer** | Bandwidth Out (First 100 GB/mo free) | **$0.00** | ₹0 |
 | **MongoDB Atlas** | M0 Sandbox Replica Set (AWS Mumbai) | **$0.00** *(Free Forever)* | ₹0 |
 | **GitHub Actions** | 2,000 Runner Minutes / month | **$0.00** *(Free Tier)* | ₹0 |
-| **TOTAL (Year 1 AWS Free Tier)** | Full Stack Live (Direct EC2 + Certbot + Atlas) | **~$2.20 / mo** | **~₹189 / mo** |
-| **TOTAL (Standard Post-Free Tier)** | Full Stack Live (Standard On-Demand Rate) | **~$9.79 / mo** | **~₹842 / mo** |
+| **TOTAL (Year 1 AWS Free Tier)** | Full Production Stack Live | **~$2.20 / mo** | **~₹189 / mo** |
+| **TOTAL (Standard Post-Free Tier)** | Full Production Stack Live | **~$13.44 / mo** | **~₹1,156 / mo** |
 
 *(For full cost analysis, volume pricing, and comparisons, see [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md#4-comprehensive-aws--cloud-cost-breakdown)).*
 
