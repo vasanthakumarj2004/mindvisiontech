@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Allow: /favicon.ico
+Allow: /*.png$
+Allow: /*.svg$
+Allow: /*.ico$
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /favicon.ico
+Allow: /icon-*.png
+Allow: /mindvisiontech-mark.svg
+
+Sitemap: https://mindvisiontech.com/sitemap.xml

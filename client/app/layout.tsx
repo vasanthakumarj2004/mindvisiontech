@@ -43,10 +43,20 @@ export const metadata: Metadata = {
     locale: "en_IN",
     type: "website",
   },
+  manifest: "/site.webmanifest",
   icons: {
-    icon: "/mindvisiontech-mark.svg",
-    shortcut: "/mindvisiontech-mark.svg",
-    apple: "/mindvisiontech-mark.svg",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon-48.png", sizes: "48x48", type: "image/png" },
+      { url: "/icon-96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      { url: "/mindvisiontech-mark.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
 };
 
