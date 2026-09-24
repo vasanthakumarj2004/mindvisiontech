@@ -91,8 +91,21 @@ else
     exit 1
 fi
 
-# 6. Reload NGINX with Real Production Certificate & Test Auto-Renewal
-echo "--> [6/6] Reloading NGINX with live Let's Encrypt certificate..."
+# 6. Normalize Certificate Lineage & Reload NGINX
+echo "--> [6/6] Finalizing certificate links and reloading NGINX..."
+
+# Handle Certbot -0001 lineage if previous directory or bootstrap cert existed
+if [ -d "/etc/letsencrypt/live/${DOMAIN}-0001" ]; then
+    echo "Certbot created ${DOMAIN}-0001 lineage. Linking to active ${DOMAIN} path..."
+    if [ -d "/etc/letsencrypt/live/${DOMAIN}" ] && [ ! -L "/etc/letsencrypt/live/${DOMAIN}" ]; then
+        rm -rf "/etc/letsencrypt/live/${DOMAIN}.bak"
+        mv "/etc/letsencrypt/live/${DOMAIN}" "/etc/letsencrypt/live/${DOMAIN}.bak"
+    fi
+    rm -f "/etc/letsencrypt/live/${DOMAIN}"
+    ln -sf "/etc/letsencrypt/live/${DOMAIN}-0001" "/etc/letsencrypt/live/${DOMAIN}"
+    rm -f "/etc/letsencrypt/renewal/${DOMAIN}.conf"
+fi
+
 nginx -t
 systemctl reload nginx
 
@@ -103,6 +116,6 @@ echo "===================================================================="
 echo "[$(date '+%Y-%m-%d %H:%M:%S')] Let's Encrypt SSL Setup COMPLETE & ACTIVE!"
 echo "Main Site:  https://${DOMAIN}"
 echo "WWW Site:   https://${WWW_DOMAIN}"
-echo "Cert Path:  ${CERT_DIR}/fullchain.pem"
+echo "Cert Path:  /etc/letsencrypt/live/${DOMAIN}/fullchain.pem"
 echo "Auto-Renew: Managed automatically by systemd certbot.timer"
 echo "===================================================================="

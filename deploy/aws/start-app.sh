@@ -125,9 +125,17 @@ echo "--> [7/7] Configuring and testing NGINX with SSL..."
 mkdir -p /var/www/certbot
 chown -R www-data:www-data /var/www/certbot
 
-# Ensure bootstrap SSL certificate exists if Let's Encrypt has not run yet
+# Ensure valid SSL certificate exists (links to -0001 lineage if present, or creates bootstrap)
 CERT_DIR="/etc/letsencrypt/live/mindvisiontech.com"
-if [ ! -f "${CERT_DIR}/fullchain.pem" ]; then
+if [ -d "${CERT_DIR}-0001" ]; then
+    if [ -d "${CERT_DIR}" ] && [ ! -L "${CERT_DIR}" ]; then
+        rm -rf "${CERT_DIR}.bak"
+        mv "${CERT_DIR}" "${CERT_DIR}.bak"
+    fi
+    rm -f "${CERT_DIR}"
+    ln -sf "${CERT_DIR}-0001" "${CERT_DIR}"
+    rm -f /etc/letsencrypt/renewal/mindvisiontech.com.conf
+elif [ ! -f "${CERT_DIR}/fullchain.pem" ]; then
     echo "Let's Encrypt certificate not found. Generating bootstrap SSL certificate so NGINX can boot..."
     mkdir -p "${CERT_DIR}"
     openssl req -x509 -nodes -days 30 -newkey rsa:2048 \
