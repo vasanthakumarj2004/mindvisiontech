@@ -120,8 +120,23 @@ fi
 chown -R www-data:www-data /var/www/mindvisiontech
 cd "${APP_DIR}"
 
-# 7. NGINX CONFIGURATION & RELOAD
-echo "--> [7/7] Configuring and testing NGINX..."
+# 7. NGINX & SSL CERTIFICATE CONFIGURATION
+echo "--> [7/7] Configuring and testing NGINX with SSL..."
+mkdir -p /var/www/certbot
+chown -R www-data:www-data /var/www/certbot
+
+# Ensure bootstrap SSL certificate exists if Let's Encrypt has not run yet
+CERT_DIR="/etc/letsencrypt/live/mindvisiontech.com"
+if [ ! -f "${CERT_DIR}/fullchain.pem" ]; then
+    echo "Let's Encrypt certificate not found. Generating bootstrap SSL certificate so NGINX can boot..."
+    mkdir -p "${CERT_DIR}"
+    openssl req -x509 -nodes -days 30 -newkey rsa:2048 \
+        -keyout "${CERT_DIR}/privkey.pem" \
+        -out "${CERT_DIR}/fullchain.pem" \
+        -subj "/CN=mindvisiontech.com"
+    chmod 600 "${CERT_DIR}/privkey.pem"
+fi
+
 if [ -f "${APP_DIR}/deploy/aws/nginx-single-ec2.conf" ]; then
     cp "${APP_DIR}/deploy/aws/nginx-single-ec2.conf" /etc/nginx/sites-available/mindvisiontech
     rm -f /etc/nginx/sites-enabled/default

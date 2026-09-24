@@ -17,19 +17,18 @@ MindVisionTech is an enterprise-grade web application platform providing industr
 
 ## 1. Production Architecture Overview
 
-The production deployment utilizes an **AWS Application Load Balancer (ALB)** with **AWS Certificate Manager (ACM)** for managed SSL/TLS termination, routing traffic to a hardened **EC2 single-instance** host fronted by **NGINX**, with data persisted in **MongoDB Atlas**:
+The production deployment replaces the AWS Application Load Balancer (ALB) with **Direct NGINX TLS 1.3 Termination & Certbot (Let's Encrypt)** running directly on the EC2 instance, cutting cloud hosting costs by over 65%:
 
 ```mermaid
 flowchart TD
     Users["End Users (Browsers & Mobile)"]
 
     subgraph AWS["AWS Cloud (ap-south-1 Mumbai)"]
-        R53["AWS Route 53 (DNS)"]
-        ACM["AWS Certificate Manager (ACM TLS 1.3)"]
-        ALB["Application Load Balancer (ALB)"]
+        R53["AWS Route 53 (DNS)<br/>mindvisiontech.com"]
         
         subgraph EC2["EC2 Instance (Ubuntu 24.04 LTS)"]
-            NGINX["NGINX Web Server (Port 80)"]
+            NGINX["NGINX Web Server<br/>• Port 80: HTTP Redirect to HTTPS<br/>• Port 443: TLS 1.3 SSL Termination<br/>• Serves Static Next.js (/var/www/mindvisiontech/out)"]
+            Certbot["Certbot Daemon (Let's Encrypt Auto-Renewal)"]
             API["Docker: Express API (Port 5000)"]
             LocalMongo["Fallback Docker: MongoDB 7.0"]
             Systemd["systemd: mindvisiontech.service"]
@@ -45,13 +44,12 @@ flowchart TD
         GHA["GitHub Actions Runner"]
     end
 
-    Users -->|"1. HTTPS Request (mindvisiontech.com)"| R53
-    R53 -->|"2. Forward to ALB"| ALB
-    ACM -.->|"Terminates SSL 443"| ALB
-    ALB -->|"3. Forward HTTP 80"| NGINX
-    NGINX -->|"4a. Serve Static Web Pages"| Users
-    NGINX -->|"4b. Reverse Proxy API Requests"| API
-    API -->|"5. Secure TLS Queries"| Atlas
+    Users -->|"1. HTTPS (443) / HTTP (80)"| R53
+    R53 -->|"2. Direct DNS Resolution (EC2 IP)"| NGINX
+    Certbot -.->|"Auto-renews SSL"| NGINX
+    NGINX -->|"3a. Serve Static Web Pages"| Users
+    NGINX -->|"3b. Reverse Proxy API Requests"| API
+    API -->|"4. Secure TLS Queries"| Atlas
     API -.->|"Fallback if Atlas Inactive"| LocalMongo
 
     GHA -->|"git push: Pre-built Frontend & Container Swap"| NGINX
@@ -248,17 +246,17 @@ To enable automated deployments, add these secrets under **Settings $\rightarrow
 | Service | Tier / Usage | Monthly Cost (USD) | Monthly Cost (INR @ ₹86/$) |
 | :--- | :--- | :---: | :---: |
 | **AWS Route 53** | 1 Hosted Zone + Queries | **$0.60** | ₹51 |
-| **AWS Certificate Manager (ACM)** | Wildcard SSL Certificate (`*.mindvisiontech.com`) | **$0.00** *(Free)* | ₹0 |
-| **AWS Application Load Balancer (ALB)** | Ingress & SSL Termination (Hourly + LCU) | **$17.59** | ₹1,512 |
+| **Certbot (Let's Encrypt)** | Wildcard/Multi-Domain SSL Certificate | **$0.00** *(Free)* | ₹0 |
+| **AWS Application Load Balancer (ALB)** | — | **$0.00** *(Removed/Eliminated)* | ₹0 |
 | **AWS EC2 Compute** | `t2.micro` / `t3.micro` | **$0.00** *(Year 1 Free Tier)*<br/>or **$7.59** *(Standard)* | ₹0 *(Free Tier)*<br/>or ₹652 |
 | **AWS EBS Storage** | 20 GB `gp3` SSD | **$1.60** | ₹137 |
 | **AWS Data Transfer** | Bandwidth Out (First 100 GB/mo free) | **$0.00** | ₹0 |
 | **MongoDB Atlas** | M0 Sandbox Replica Set (AWS Mumbai) | **$0.00** *(Free Forever)* | ₹0 |
 | **GitHub Actions** | 2,000 Runner Minutes / month | **$0.00** *(Free Tier)* | ₹0 |
-| **TOTAL (Year 1 AWS Free Tier)** | Full Stack Live (ALB + ACM + EC2 + Atlas) | **~$19.79 / mo** | **~₹1,701 / mo** |
-| **TOTAL (Standard Post-Free Tier)** | Full Stack Live (Standard On-Demand Rate) | **~$27.38 / mo** | **~₹2,354 / mo** |
+| **TOTAL (Year 1 AWS Free Tier)** | Full Stack Live (Direct EC2 + Certbot + Atlas) | **~$2.20 / mo** | **~₹189 / mo** |
+| **TOTAL (Standard Post-Free Tier)** | Full Stack Live (Standard On-Demand Rate) | **~$9.79 / mo** | **~₹842 / mo** |
 
-*(For full cost analysis, volume pricing, and low-cost alternative tiers, see [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md#4-comprehensive-aws--cloud-cost-breakdown)).*
+*(For full cost analysis, volume pricing, and comparisons, see [SYSTEM_ARCHITECTURE.md](SYSTEM_ARCHITECTURE.md#4-comprehensive-aws--cloud-cost-breakdown)).*
 
 ---
 

@@ -25,10 +25,10 @@ Below is the complete inventory of all technologies, runtimes, frameworks, libra
 | **Container Engine** | **Docker** | `24.0+ / 27.0+` | Container virtualization for portable, reproducible runtime environments. |
 | **Container Orchestration** | **Docker Compose** | `v2.x` | Multi-container composition, internal bridge networking, and atomic hot-swaps. |
 | **Base Container Image** | **Node 20 Alpine** | `node:20-alpine` | Ultra-lean, hardened container base image (~180MB) with minimal attack surface. |
-| **DNS Service** | **AWS Route 53** | Global Anycast | Highly available DNS routing apex domain (`mindvisiontech.com`), `www`, and subdomains to AWS ALB. |
-| **SSL / TLS Encryption** | **AWS Certificate Manager (ACM)** | TLS 1.2 / TLS 1.3 | Free, auto-renewing public SSL/TLS wildcard certificate terminating HTTPS traffic at the ALB. |
-| **Load Balancing** | **AWS Application Load Balancer (ALB)** | Layer 7 Dual-AZ | Internet-facing load balancer terminating HTTPS (443), enforcing HTTP-to-HTTPS redirects, and forwarding to EC2 on port 80. |
-| **Compute Instance** | **AWS EC2** | `t2.micro` / `t3.micro` | Ubuntu Linux host running the Dockerized API, NGINX web server, and local static assets. |
+| **DNS Service** | **AWS Route 53** | Global Anycast | Authoritative DNS routing apex domain (`mindvisiontech.com`), `www`, and `api` directly to EC2 Public / Elastic IP. |
+| **SSL / TLS Encryption** | **Certbot (Let's Encrypt)** | TLS 1.2 / TLS 1.3 | Free, auto-renewing public SSL/TLS certificate managed by Certbot directly on EC2 via systemd timer. |
+| **Web Server & Reverse Proxy** | **NGINX** | `1.24+ / 1.18+` | Terminating HTTPS (443), redirecting HTTP (80) to HTTPS, serving pre-rendered static assets, and reverse proxying `/api/*` to Express. |
+| **Compute Instance** | **AWS EC2** | `t2.micro` / `t3.micro` | Ubuntu Linux host running NGINX with Certbot, Dockerized API, and local static assets. |
 | **Storage (Block)** | **AWS EBS** | `gp3 (20 GB - 30 GB)` | High-speed general-purpose SSD storage (3,000 IOPS, 125 MB/s baseline) for OS, Docker images, and local backups. |
 | **Operating System** | **Ubuntu Linux** | `24.04 LTS / 22.04 LTS` | Hardened Linux OS with kernel memory swap, systemd supervision, and UFW firewall. |
 | **Process Supervision** | **Linux systemd** | Native | Self-healing daemon (`mindvisiontech.service`) ensuring the entire app automatically restarts on EC2 reboot or stop/start. |
@@ -64,12 +64,11 @@ flowchart TD
     Users["End Users (Browsers & Mobile)"]
 
     subgraph AWS["AWS Cloud (ap-south-1 Mumbai)"]
-        R53["AWS Route 53 (DNS)"]
-        ACM["AWS Certificate Manager (ACM TLS 1.3)"]
-        ALB["Application Load Balancer (ALB)"]
+        R53["AWS Route 53 (DNS)<br/>mindvisiontech.com"]
         
         subgraph EC2["EC2 Instance (Ubuntu 24.04 LTS)"]
-            NGINX["NGINX Web Server (Port 80)"]
+            NGINX["NGINX Web Server<br/>• Port 80: HTTP Redirect to HTTPS<br/>• Port 443: TLS 1.3 SSL Termination<br/>• Serves Static Next.js (/var/www/mindvisiontech/out)"]
+            Certbot["Certbot Daemon (Let's Encrypt Auto-Renewal)"]
             API["Docker: Express API (Port 5000)"]
             FallbackDB["Fallback Docker: MongoDB 7.0"]
             Systemd["systemd: mindvisiontech.service"]
@@ -85,13 +84,12 @@ flowchart TD
         GHA["GitHub Actions Runner"]
     end
 
-    Users -->|"1. HTTPS Request (mindvisiontech.com)"| R53
-    R53 -->|"2. Forward to ALB"| ALB
-    ACM -.->|"Terminates SSL 443"| ALB
-    ALB -->|"3. Forward HTTP 80"| NGINX
-    NGINX -->|"4a. Serve Static Web Pages"| Users
-    NGINX -->|"4b. Reverse Proxy API Requests"| API
-    API -->|"5. Secure TLS Queries"| Atlas
+    Users -->|"1. HTTPS (443) / HTTP (80)"| R53
+    R53 -->|"2. Direct DNS Resolution (EC2 IP)"| NGINX
+    Certbot -.->|"Auto-renews SSL"| NGINX
+    NGINX -->|"3a. Serve Static Web Pages"| Users
+    NGINX -->|"3b. Reverse Proxy API Requests"| API
+    API -->|"4. Secure TLS Queries"| Atlas
     API -.->|"Fallback if Atlas Inactive"| FallbackDB
 
     GHA -->|"git push: Pre-built Frontend & Container Swap"| NGINX
@@ -197,18 +195,17 @@ The following table itemizes the exact operational costs for hosting MindVisionT
 
 | Cloud Service | Specific Resource / Tier | Unit Pricing | Monthly Quantity | Estimated Cost (USD) | Cost (INR @ ₹86/$) | Notes & Optimization |
 | :--- | :--- | :--- | :--- | :---: | :---: | :--- |
-| **AWS Route 53** | Hosted Zone | $0.50 per hosted zone / mo | 1 Hosted Zone (`mindvisiontech.com`) | **$0.50** | ₹43 | Authoritative DNS resolution for apex and subdomains. |
+| **AWS Route 53** | Hosted Zone | $0.50 per hosted zone / mo | 1 Hosted Zone (`mindvisiontech.com`) | **$0.50** | ₹43 | Authoritative DNS resolution routing directly to EC2 IP. |
 | **AWS Route 53** | DNS Query Traffic | $0.40 per 1,000,000 queries | ~250,000 queries / mo | **$0.10** | ₹8.60 | Standard DNS lookups from global users. |
-| **AWS ACM** | Public SSL/TLS Certificate | **$0.00** (Free of charge) | 1 Wildcard Certificate (`*.mindvisiontech.com`) | **$0.00** | ₹0 | Automatic DNS validation and annual renewal managed by AWS. |
-| **AWS ALB** | Application Load Balancer (Base) | $0.0225 per hour | 730 hours / mo | **$16.42** | ₹1,412 | Fixed hourly charge for dual-AZ managed ALB ingress. |
-| **AWS ALB** | Load Balancer Capacity Units (LCU) | $0.008 per LCU-hour | ~0.2 LCU average (~146 LCU-hrs) | **$1.17** | ₹100 | Measured by new connections, active connections, and bandwidth. |
+| **Certbot (Let's Encrypt)** | Public SSL/TLS Certificate | **$0.00** (Free of charge) | Wildcard/Multi-domain SSL (`*.mindvisiontech.com`) | **$0.00** | ₹0 | Automatic renewal via systemd timer directly on EC2. |
+| **AWS ALB** | Application Load Balancer | — | **ELIMINATED / REMOVED** | **$0.00** | ₹0 | Replaced by direct NGINX TLS 1.3 termination, saving ~$18/mo. |
 | **AWS EC2** | Compute: `t3.micro` (or `t2.micro`) | $0.0104 per hour (On-Demand) | 730 hours / mo | **$0.00** *(Year 1 Free Tier)*<br/>or **$7.59** *(Standard)* | ₹0 *(Free Tier)*<br/>or ₹652 | **Free Tier**: 750 hours/mo of t2/t3.micro free for first 12 months. |
 | **AWS EBS** | General Purpose SSD (`gp3`) | $0.08 per GB-month | 20 GB Storage Allocation | **$1.60** | ₹137 | Baseline 3,000 IOPS and 125 MB/s throughput included free. |
 | **AWS Data Transfer** | Internet Egress (Bandwidth Out) | First 100 GB/mo free globally | ~30 GB outgoing data / mo | **$0.00** | ₹0 | HTML, CSS, JS, and JSON API payloads fall within the 100 GB free tier. |
 | **MongoDB Atlas** | Managed Cloud DB: `M0 Sandbox` | **$0.00** (Free Forever) | 512 MB Storage, Shared RAM | **$0.00** | ₹0 | Hosted in AWS Mumbai (`ap-south-1`). Zero hosting cost. |
 | **GitHub Actions** | CI/CD Automated Pipelines | 2,000 free minutes/mo (Linux) | ~120 minutes used / mo | **$0.00** | ₹0 | Optimized workflow takes ~45 seconds per push. |
-| **TOTAL (Year 1 AWS Free Tier Active)** | — | — | — | **~$19.79 / mo** | **~₹1,701 / mo** | Includes ALB + ACM + Route 53 + EBS (EC2 & Atlas free). |
-| **TOTAL (Standard Post-Free Tier)** | — | — | — | **~$27.38 / mo** | **~₹2,354 / mo** | Full on-demand rate with all services running 24/7. |
+| **TOTAL (Year 1 AWS Free Tier Active)** | — | — | — | **~$2.20 / mo** | **~₹189 / mo** | Route 53 ($0.60) + EBS ($1.60) (EC2, SSL & Atlas are FREE). |
+| **TOTAL (Standard Post-Free Tier)** | — | — | — | **~$9.79 / mo** | **~₹842 / mo** | Direct EC2 + Certbot + Route 53 + EBS (Savings: >$200/year). |
 
 ---
 
