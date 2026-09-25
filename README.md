@@ -154,12 +154,33 @@ docker compose up -d mongodb
 
 # Initialize environment variables
 cp server/.env.example server/.env
+```
 
+### 3. Setup Admin Panel (Optional)
+The admin panel allows managing courses, internship tracks, and PDF materials.
+
+1. Ensure your `server/.env` file has the required admin variables:
+   ```ini
+   JWT_SECRET=your_long_random_secret
+   # AWS S3 (for PDF uploads)
+   AWS_REGION=us-east-1
+   AWS_S3_BUCKET_NAME=your-bucket-name
+   # AWS credentials (if not using an IAM role on EC2)
+   AWS_ACCESS_KEY_ID=
+   AWS_SECRET_ACCESS_KEY=
+   ```
+2. Create your first admin account via the CLI seed script (since there is no open registration):
+   ```bash
+   node server/scripts/createAdmin.js your.email@example.com your_secure_password
+   ```
+
+### 4. Launch Application
+```bash
 # Launch server (:5000) and client (:3000) concurrently
 npm run dev
 ```
 
-### 3. Run Automated Tests
+### 5. Run Automated Tests
 ```bash
 # Run all 26 server and client tests (Vitest)
 npm test
