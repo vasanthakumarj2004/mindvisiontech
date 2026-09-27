@@ -4,13 +4,12 @@
  * Sends cookies automatically (credentials: 'include').
  */
 
-const getBase = () =>
-  (process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:5000/api") + "/admin";
+const BASE_API = () =>
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:5000/api";
 
-async function req<T>(
-  path: string,
-  options: RequestInit = {}
-): Promise<T> {
+const getBase = () => `${BASE_API()}/admin`;
+
+async function req<T>(path: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${getBase()}${path}`, {
     credentials: "include",
     headers: { "Content-Type": "application/json", ...options.headers },
@@ -18,8 +17,17 @@ async function req<T>(
   });
 
   if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error((body as { message?: string }).message || `HTTP ${res.status}`);
+    const body = (await res.json().catch(() => ({}))) as {
+      message?: string;
+      errors?: Array<{ msg?: string; path?: string }>;
+    };
+    const detail = Array.isArray(body.errors)
+      ? body.errors
+          .map((e) => (e.path ? `${e.path}: ${e.msg}` : e.msg))
+          .filter(Boolean)
+          .join(", ")
+      : null;
+    throw new Error(body.message || detail || `HTTP ${res.status}`);
   }
 
   return res.json() as Promise<T>;
@@ -42,28 +50,42 @@ export type Course = {
   updatedAt: string;
 };
 
-export type InternshipTrack = {
+export type Subject = {
   _id: string;
   name: string;
   slug: string;
-  description: string;
+  course: string;
+  order: number;
+  createdAt: string;
 };
 
 export type PdfMaterial = {
   _id: string;
   title: string;
   url: string;
+  s3Key: string;
   fileSize: number;
-  track: string;
-  uploadedBy: { _id: string; email: string } | string;
-  uploadedAt: string;
+  subject: string;
+  uploadedBy: string;
+  createdAt: string;
+};
+
+export type Student = {
+  _id: string;
+  name: string;
+  course: { _id: string; name: string; slug: string } | string;
+  courseFees: number;
+  discount: number;
+  finalFees: number;
+  enrolledAt: string;
   createdAt: string;
 };
 
 export type DashboardStats = {
   totalCourses: number;
-  totalTracks: number;
-  totalPdfs: number;
+  totalSubjects: number;
+  totalStudents: number;
+  totalStudyMaterials: number;
 };
 
 // ── Auth ───────────────────────────────────────────────────────────────────
@@ -91,11 +113,15 @@ export const getAdminCourse = (id: string) =>
   req<{ data: Course }>(`/courses/${id}`).then((r) => r.data);
 
 export const createAdminCourse = (payload: Partial<Course & { thumbnailUrl: string }>) =>
-  req<{ data: Course }>("/courses", { method: "POST", body: JSON.stringify(payload) }).then(
-    (r) => r.data
-  );
+  req<{ data: Course }>("/courses", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }).then((r) => r.data);
 
-export const updateAdminCourse = (id: string, payload: Partial<Course & { thumbnailUrl: string }>) =>
+export const updateAdminCourse = (
+  id: string,
+  payload: Partial<Course & { thumbnailUrl: string }>
+) =>
   req<{ data: Course }>(`/courses/${id}`, {
     method: "PUT",
     body: JSON.stringify(payload),
@@ -104,25 +130,45 @@ export const updateAdminCourse = (id: string, payload: Partial<Course & { thumbn
 export const deleteAdminCourse = (id: string) =>
   req<{ message: string }>(`/courses/${id}`, { method: "DELETE" });
 
-// ── Internship Tracks ──────────────────────────────────────────────────────
+// ── Subjects ───────────────────────────────────────────────────────────────
 
-export const getInternshipTracks = () =>
-  req<{ data: InternshipTrack[] }>("/internships").then((r) => r.data);
+export const getCourseSubjects = (courseId: string) =>
+  req<{ data: Subject[] }>(`/courses/${courseId}/subjects`).then((r) => r.data);
 
-// ── PDFs ───────────────────────────────────────────────────────────────────
+export const createSubject = (courseId: string, payload: { name: string; order?: number }) =>
+  req<{ data: Subject }>(`/courses/${courseId}/subjects`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }).then((r) => r.data);
 
-export const getTrackPdfs = (trackId: string) =>
-  req<{ data: PdfMaterial[]; track: InternshipTrack }>(`/internships/${trackId}/pdfs`);
+export const updateSubject = (
+  courseId: string,
+  subjectId: string,
+  payload: { name?: string; order?: number }
+) =>
+  req<{ data: Subject }>(`/courses/${courseId}/subjects/${subjectId}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  }).then((r) => r.data);
 
-export const uploadTrackPdf = (trackId: string, file: File, title?: string) => {
+export const deleteSubject = (courseId: string, subjectId: string) =>
+  req<{ message: string }>(`/courses/${courseId}/subjects/${subjectId}`, {
+    method: "DELETE",
+  });
+
+// ── PDFs (Subject-scoped) ──────────────────────────────────────────────────
+
+export const getSubjectPdfs = (subjectId: string) =>
+  req<{ data: PdfMaterial[] }>(`/subjects/${subjectId}/pdfs`).then((r) => r.data);
+
+export const uploadSubjectPdf = (subjectId: string, file: File, title?: string) => {
   const form = new FormData();
   form.append("file", file);
   if (title) form.append("title", title);
-  return fetch(`${getBase()}/internships/${trackId}/pdfs`, {
+  return fetch(`${getBase()}/subjects/${subjectId}/pdfs`, {
     method: "POST",
     credentials: "include",
     body: form,
-    // No Content-Type header — browser sets multipart/form-data with boundary
   }).then(async (res) => {
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
@@ -132,16 +178,16 @@ export const uploadTrackPdf = (trackId: string, file: File, title?: string) => {
   });
 };
 
-export const replaceTrackPdf = (
-  trackId: string,
+export const updateSubjectPdf = (
+  subjectId: string,
   pdfId: string,
-  file: File,
+  file?: File,
   title?: string
 ) => {
   const form = new FormData();
-  form.append("file", file);
+  if (file) form.append("file", file);
   if (title) form.append("title", title);
-  return fetch(`${getBase()}/internships/${trackId}/pdfs/${pdfId}`, {
+  return fetch(`${getBase()}/subjects/${subjectId}/pdfs/${pdfId}`, {
     method: "PUT",
     credentials: "include",
     body: form,
@@ -154,8 +200,58 @@ export const replaceTrackPdf = (
   });
 };
 
-export const deleteTrackPdf = (trackId: string, pdfId: string) =>
-  req<{ message: string }>(`/internships/${trackId}/pdfs/${pdfId}`, { method: "DELETE" });
+export const deleteSubjectPdf = (subjectId: string, pdfId: string) =>
+  req<{ message: string }>(`/subjects/${subjectId}/pdfs/${pdfId}`, {
+    method: "DELETE",
+  });
+
+// ── Students ───────────────────────────────────────────────────────────────
+
+export const getAdminStudents = () =>
+  req<{ data: Student[] }>("/students").then((r) => r.data);
+
+export const getAdminStudent = (id: string) =>
+  req<{ data: Student }>(`/students/${id}`).then((r) => r.data);
+
+export const createAdminStudent = (payload: {
+  name: string;
+  course: string;
+  courseFees: number;
+  discount?: number;
+  enrolledAt?: string;
+}) =>
+  req<{ data: Student }>("/students", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  }).then((r) => r.data);
+
+export const updateAdminStudent = (
+  id: string,
+  payload: Partial<{
+    name: string;
+    course: string;
+    courseFees: number;
+    discount: number;
+    enrolledAt: string;
+  }>
+) =>
+  req<{ data: Student }>(`/students/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  }).then((r) => r.data);
+
+export const deleteAdminStudent = (id: string) =>
+  req<{ message: string }>(`/students/${id}`, { method: "DELETE" });
+
+// ── Public Study Material ──────────────────────────────────────────────────
+
+export const getStudyMaterial = () =>
+  fetch(`${BASE_API()}/study-material`, {
+    credentials: "include",
+  }).then(async (res) => {
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  });
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 

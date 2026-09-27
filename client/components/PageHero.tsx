@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { TickerBar } from "@/components/TickerBar";
 
@@ -23,7 +23,7 @@ interface PageHeroProps {
   /** JSX or string — supports <em> for italic accent word */
   subheading?: string;
   /** Optional right-side element (stat, image, badge) */
-  aside?: React.ReactNode;
+  aside?: ReactNode;
 }
 
 export function PageHero({ eyebrow, heading, subheading, aside }: PageHeroProps) {

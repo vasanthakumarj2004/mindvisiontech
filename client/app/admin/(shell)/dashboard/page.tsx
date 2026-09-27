@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { BookOpen, GraduationCap, FileText, TrendingUp } from "lucide-react";
+import { useEffect, useState, type ElementType } from "react";
+import Link from "next/link";
+import { BookOpen, Users, FileText, Layers, TrendingUp } from "lucide-react";
 import { getDashboardStats, type DashboardStats } from "@/lib/adminApi";
 
 function StatCard({
@@ -12,7 +13,7 @@ function StatCard({
 }: {
   label: string;
   value: number | string;
-  icon: React.ElementType;
+  icon: ElementType;
   color: string;
 }) {
   return (
@@ -38,7 +39,9 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     getDashboardStats()
       .then(setStats)
-      .catch((err: unknown) => setError(err instanceof Error ? err.message : "Failed to load stats"))
+      .catch((err: unknown) =>
+        setError(err instanceof Error ? err.message : "Failed to load stats")
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -50,8 +53,8 @@ export default function AdminDashboardPage() {
       </div>
 
       {loading && (
-        <div className="grid gap-4 sm:grid-cols-3">
-          {[1, 2, 3].map((i) => (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
             <div key={i} className="h-28 animate-pulse rounded-2xl bg-gray-200" />
           ))}
         </div>
@@ -64,7 +67,7 @@ export default function AdminDashboardPage() {
       )}
 
       {stats && (
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             label="Total Courses"
             value={stats.totalCourses}
@@ -72,14 +75,20 @@ export default function AdminDashboardPage() {
             color="bg-brand-blue"
           />
           <StatCard
-            label="Internship Tracks"
-            value={stats.totalTracks}
-            icon={GraduationCap}
+            label="Total Subjects"
+            value={stats.totalSubjects}
+            icon={Layers}
             color="bg-brand-orange"
           />
           <StatCard
-            label="PDF Materials"
-            value={stats.totalPdfs}
+            label="Total Students"
+            value={stats.totalStudents}
+            icon={Users}
+            color="bg-violet-500"
+          />
+          <StatCard
+            label="Study Materials"
+            value={stats.totalStudyMaterials}
             icon={FileText}
             color="bg-emerald-500"
           />
@@ -94,11 +103,9 @@ export default function AdminDashboardPage() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[
             { label: "Manage Courses", href: "/admin/courses", icon: BookOpen },
-            { label: "3-Day Materials", href: "/admin/internships/3-day", icon: GraduationCap },
-            { label: "5-Day Materials", href: "/admin/internships/5-day", icon: GraduationCap },
-            { label: "12-Day Materials", href: "/admin/internships/12-day", icon: GraduationCap },
+            { label: "Manage Students", href: "/admin/students", icon: Users },
           ].map(({ label, href, icon: Icon }) => (
-            <a
+            <Link
               key={href}
               href={href}
               className="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-4 py-3.5 text-sm font-semibold text-gray-700 shadow-sm hover:border-brand-blue hover:text-brand-blue transition-all"
@@ -106,7 +113,7 @@ export default function AdminDashboardPage() {
               <Icon className="h-4 w-4 shrink-0 text-brand-orange" />
               {label}
               <TrendingUp className="ml-auto h-3.5 w-3.5 opacity-30" />
-            </a>
+            </Link>
           ))}
         </div>
       </div>

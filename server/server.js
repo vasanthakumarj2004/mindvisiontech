@@ -10,7 +10,7 @@ import branchRoutes from './routes/branchRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
 import leadRoutes from './routes/leadRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
-import { seedInternshipTracks } from './services/seedService.js';
+import studyMaterialRoutes from './routes/studyMaterialRoutes.js';
 
 const app = express();
 
@@ -51,6 +51,7 @@ app.use('/api/courses', courseRoutes);
 app.use('/api/branches', branchRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/study-material', studyMaterialRoutes);
 app.use(errorHandler);
 
 let server;
@@ -58,7 +59,6 @@ let server;
 if (process.env.NODE_ENV !== 'test') {
   connectDatabase(env.mongoUri)
     .then(async () => {
-      await seedInternshipTracks();
       server = app.listen(env.port, () => console.info(`API listening on http://localhost:${env.port}`));
     })
     .catch((error) => {

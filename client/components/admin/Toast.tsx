@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertCircle, CheckCircle2, Info, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 type Variant = "success" | "error" | "info";
 
@@ -24,7 +24,7 @@ export function Toast({ message, variant = "info", onClose, duration = 4000 }: T
     info: "bg-blue-50 border-brand-blue/20 text-brand-blue",
   };
 
-  const icons: Record<Variant, React.ReactNode> = {
+  const icons: Record<Variant, ReactNode> = {
     success: <CheckCircle2 className="h-4 w-4 text-green-600 shrink-0" />,
     error: <AlertCircle className="h-4 w-4 text-red-600 shrink-0" />,
     info: <Info className="h-4 w-4 text-brand-blue shrink-0" />,
@@ -64,5 +64,5 @@ export function useToast() {
     </div>
   ) : null;
 
-  return { show, dismiss, ToastUI };
+  return { show, dismiss, toast: show, ToastUI };
 }

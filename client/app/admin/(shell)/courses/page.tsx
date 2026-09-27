@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import Link from "next/link";
 import {
-  Plus, Pencil, Trash2, Eye, Loader2, X, Search, CheckCircle, XCircle,
+  Plus, Pencil, Trash2, Eye, Loader2, X, Search, CheckCircle, XCircle, BookOpen,
 } from "lucide-react";
 import {
   getAdminCourses,
@@ -66,6 +67,7 @@ function CourseModal({
   );
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+  const errRef = useRef<HTMLDivElement>(null);
 
   function set<K extends keyof FormData>(k: K, v: FormData[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -83,6 +85,9 @@ function CourseModal({
       onSave(course);
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : "Save failed");
+      requestAnimationFrame(() =>
+        errRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+      );
     } finally {
       setSaving(false);
     }
@@ -101,9 +106,13 @@ function CourseModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
+        <form onSubmit={handleSubmit}>
+          <div className="px-6 py-5 space-y-4 max-h-[70vh] overflow-y-auto">
           {err && (
-            <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-red-700">
+            <div
+              ref={errRef}
+              className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm font-semibold text-red-700"
+            >
               {err}
             </div>
           )}
@@ -190,7 +199,8 @@ function CourseModal({
               Thumbnail URL
             </label>
             <input
-              type="url"
+              type="text"
+              inputMode="url"
               value={form.thumbnailUrl}
               onChange={(e) => set("thumbnailUrl", e.target.value)}
               className="w-full rounded-xl border border-gray-200 px-3 py-2.5 text-sm outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue"
@@ -217,27 +227,27 @@ function CourseModal({
               {form.isActive ? "Active (visible on site)" : "Inactive (hidden)"}
             </span>
           </div>
-        </form>
+          </div>
 
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 border-t px-6 py-4">
-          <button
-            onClick={onClose}
-            className="rounded-xl border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            form="course-form"
-            onClick={handleSubmit as unknown as React.MouseEventHandler<HTMLButtonElement>}
-            disabled={saving}
-            className="flex items-center gap-2 rounded-xl bg-brand-blue px-5 py-2 text-sm font-bold text-white hover:bg-brand-blue-deep disabled:opacity-60 transition"
-          >
-            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {editing ? "Save Changes" : "Create Course"}
-          </button>
-        </div>
+          {/* Footer */}
+          <div className="flex items-center justify-end gap-3 border-t px-6 py-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-xl border border-gray-200 px-5 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={saving}
+              className="flex items-center gap-2 rounded-xl bg-brand-blue px-5 py-2 text-sm font-bold text-white hover:bg-brand-blue-deep disabled:opacity-60 transition"
+            >
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              {editing ? "Save Changes" : "Create Course"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
@@ -343,8 +353,9 @@ export default function AdminCoursesPage() {
       }
       return [course, ...cs];
     });
+    const wasEditing = modal === "edit";
     setModal(null);
-    show(modal === "edit" ? "Course updated!" : "Course created!", "success");
+    show(wasEditing ? "Course updated!" : "Course created!", "success");
   }
 
   const filtered = courses.filter(
@@ -436,6 +447,14 @@ export default function AdminCoursesPage() {
                   </td>
                   <td className="px-5 py-4">
                     <div className="flex items-center gap-2">
+                      <Link
+                        href={`/admin/courses/${course._id}`}
+                        title="Manage Subjects"
+                        className="flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-bold text-brand-blue bg-brand-blue/10 hover:bg-brand-blue/20 transition"
+                      >
+                        <BookOpen className="h-3.5 w-3.5" />
+                        Subjects
+                      </Link>
                       <button
                         title="View"
                         onClick={() => { setSelected(course); setModal("view"); }}

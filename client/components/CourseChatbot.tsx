@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
 import {
@@ -184,7 +184,7 @@ export function CourseChatbot() {
     }, 250);
   }
 
-  function handleNameSubmit(e: React.FormEvent) {
+  function handleNameSubmit(e: FormEvent) {
     e.preventDefault();
     const trimmed = inputName.trim();
     if (!trimmed || trimmed.length < 2) {
@@ -202,7 +202,7 @@ export function CourseChatbot() {
     }, 250);
   }
 
-  function handlePhoneSubmit(e: React.FormEvent) {
+  function handlePhoneSubmit(e: FormEvent) {
     e.preventDefault();
     const cleanPhone = inputPhone.replace(/[\s\-()]/g, "");
     if (!cleanPhone || cleanPhone.length < 10) {

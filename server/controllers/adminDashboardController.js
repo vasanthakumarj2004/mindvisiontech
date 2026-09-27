@@ -1,5 +1,6 @@
 import { Course } from '../models/Course.js';
-import { InternshipTrack } from '../models/InternshipTrack.js';
+import { Subject } from '../models/Subject.js';
+import { Student } from '../models/Student.js';
 import { PdfMaterial } from '../models/PdfMaterial.js';
 
 /**
@@ -7,17 +8,19 @@ import { PdfMaterial } from '../models/PdfMaterial.js';
  * Returns summary counts for the admin dashboard overview.
  */
 export async function getDashboardStats(_req, res) {
-  const [totalCourses, totalTracks, totalPdfs] = await Promise.all([
+  const [totalCourses, totalSubjects, totalStudents, totalStudyMaterials] = await Promise.all([
     Course.countDocuments(),
-    InternshipTrack.countDocuments(),
+    Subject.countDocuments(),
+    Student.countDocuments(),
     PdfMaterial.countDocuments()
   ]);
 
   res.json({
     data: {
       totalCourses,
-      totalTracks,
-      totalPdfs
+      totalSubjects,
+      totalStudents,
+      totalStudyMaterials
     }
   });
 }

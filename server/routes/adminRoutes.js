@@ -16,12 +16,24 @@ import {
   deleteCourse
 } from '../controllers/adminCourseController.js';
 import {
-  listTracks,
+  listSubjects,
+  createSubject,
+  updateSubject,
+  deleteSubject
+} from '../controllers/adminSubjectController.js';
+import {
+  listStudents,
+  getStudent,
+  createStudent,
+  updateStudent,
+  deleteStudent
+} from '../controllers/adminStudentController.js';
+import {
   listPdfs,
   uploadPdf,
-  replacePdf,
+  updatePdf,
   deletePdf
-} from '../controllers/adminInternshipController.js';
+} from '../controllers/adminPdfController.js';
 
 const router = Router();
 
@@ -36,7 +48,9 @@ const pdfUpload = multer({
     if (file.mimetype === 'application/pdf') {
       cb(null, true);
     } else {
-      cb(new Error('Only PDF files are accepted'), false);
+      const err = new Error('Only PDF files are accepted');
+      err.status = 400;
+      cb(err, false);
     }
   }
 });
@@ -57,21 +71,44 @@ const loginValidation = [
 ];
 
 const courseValidation = [
-  body('name').notEmpty().trim().withMessage('Course name is required'),
-  body('slug').notEmpty().trim().toLowerCase().withMessage('Slug is required'),
+  body('name')
+    .custom((val, { req }) => {
+      const name = val || req.body.title;
+      if (!name || !name.trim()) throw new Error('Course name or title is required');
+      return true;
+    }),
+  body('slug')
+    .optional()
+    .trim()
+    .toLowerCase(),
   body('description').notEmpty().trim().withMessage('Description is required'),
   body('duration').notEmpty().trim().withMessage('Duration is required'),
-  body('fees').isNumeric().withMessage('Fees must be a number')
+  body('fees')
+    .custom((val, { req }) => {
+      const price = val !== undefined ? val : req.body.price;
+      if (price === undefined || isNaN(Number(price))) throw new Error('Fees or price must be a valid number');
+      return true;
+    })
 ];
 
 const courseUpdateValidation = [
   body('name').optional().notEmpty().trim().withMessage('Name cannot be empty'),
+  body('title').optional().notEmpty().trim().withMessage('Title cannot be empty'),
   body('slug').optional().notEmpty().trim().toLowerCase().withMessage('Slug cannot be empty'),
-  body('fees').optional().isNumeric().withMessage('Fees must be a number')
+  body('fees').optional().isNumeric().withMessage('Fees must be a number'),
+  body('price').optional().isNumeric().withMessage('Price must be a number')
 ];
 
-const pdfTitleValidation = [
-  body('title').optional().notEmpty().trim().withMessage('Title cannot be empty if provided')
+const subjectValidation = [
+  body('name').notEmpty().trim().withMessage('Subject name is required'),
+  body('order').optional().isNumeric().withMessage('Order must be a number')
+];
+
+const studentValidation = [
+  body('name').notEmpty().trim().withMessage('Student name is required'),
+  body('course').notEmpty().trim().withMessage('Course is required'),
+  body('courseFees').isNumeric().withMessage('Course fees must be a number'),
+  body('discount').optional().isNumeric().withMessage('Discount must be a number')
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -95,13 +132,25 @@ router.post('/courses', courseValidation, validate, createCourse);
 router.put('/courses/:id', courseUpdateValidation, validate, updateCourse);
 router.delete('/courses/:id', deleteCourse);
 
-// Internship tracks
-router.get('/internships', listTracks);
+// Subjects CRUD
+router.get('/courses/:courseId/subjects', listSubjects);
+router.post('/courses/:courseId/subjects', subjectValidation, validate, createSubject);
+router.put('/courses/:courseId/subjects/:subjectId', subjectValidation, validate, updateSubject);
+router.delete('/courses/:courseId/subjects/:subjectId', deleteSubject);
 
-// PDFs scoped to a track
-router.get('/internships/:trackId/pdfs', listPdfs);
-router.post('/internships/:trackId/pdfs', pdfUpload.single('file'), pdfTitleValidation, validate, uploadPdf);
-router.put('/internships/:trackId/pdfs/:pdfId', pdfUpload.single('file'), pdfTitleValidation, validate, replacePdf);
-router.delete('/internships/:trackId/pdfs/:pdfId', deletePdf);
+// Students CRUD
+router.get('/students', listStudents);
+router.get('/students/:id', getStudent);
+router.post('/students', studentValidation, validate, createStudent);
+router.put('/students/:id', studentValidation, validate, updateStudent);
+router.delete('/students/:id', deleteStudent);
+
+// PDFs scoped to a subject
+// Note: express-validator body() doesn't work with multipart/form-data,
+// so title validation is handled manually in the controller.
+router.get('/subjects/:subjectId/pdfs', listPdfs);
+router.post('/subjects/:subjectId/pdfs', pdfUpload.single('file'), uploadPdf);
+router.put('/subjects/:subjectId/pdfs/:pdfId', pdfUpload.single('file'), updatePdf);
+router.delete('/subjects/:subjectId/pdfs/:pdfId', deletePdf);
 
 export default router;

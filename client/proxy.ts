@@ -6,7 +6,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * The token is NOT verified here (no JWT secret in the edge runtime) —
  * the API validates it on every request. This is just a UX redirect gate.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public admin routes (no auth needed)

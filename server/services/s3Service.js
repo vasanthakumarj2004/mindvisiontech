@@ -1,22 +1,16 @@
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { env } from '../config/env.js';
-import crypto from 'crypto';
 
 const s3 = new S3Client({ region: env.awsRegion });
 
 /**
  * Upload a file buffer to S3 under pdfs/{trackSlug}/{uuid}-{originalFilename}
- * Returns { url, s3Key }
+ * Returns the public URL string.
  */
-export async function uploadPdfToS3({ buffer, originalName, mimeType, trackSlug }) {
+export async function uploadPdfToS3(buffer, s3Key, mimeType) {
   if (!env.awsBucketName) {
     throw new Error('AWS_S3_BUCKET_NAME is not configured');
   }
-
-  const uid = crypto.randomUUID();
-  // Sanitise the original filename to prevent path traversal
-  const safeName = originalName.replace(/[^a-zA-Z0-9._-]/g, '_');
-  const s3Key = `pdfs/${trackSlug}/${uid}-${safeName}`;
 
   await s3.send(
     new PutObjectCommand({
@@ -34,8 +28,7 @@ export async function uploadPdfToS3({ buffer, originalName, mimeType, trackSlug 
     ? `https://${env.awsBucketDomain}`
     : `https://${env.awsBucketName}.s3.${env.awsRegion}.amazonaws.com`;
 
-  const url = `${baseUrl}/${s3Key}`;
-  return { url, s3Key };
+  return `${baseUrl}/${s3Key}`;
 }
 
 /**

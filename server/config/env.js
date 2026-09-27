@@ -25,7 +25,7 @@ export const env = {
   clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
   corsOrigins: envOrigins,
   adminApiKey: process.env.ADMIN_API_KEY || '',
-  jwtSecret: process.env.JWT_SECRET || '',
+  jwtSecret: process.env.JWT_SECRET || (nodeEnv === 'production' ? '' : 'mindvisiontech-dev-test-secret-key-at-least-32-chars'),
   awsRegion: process.env.AWS_REGION || process.env.AWS_DEFAULT_REGION || 'us-east-1',
   awsBucketName: process.env.AWS_S3_BUCKET_NAME || '',
   awsBucketDomain: process.env.AWS_S3_BUCKET_DOMAIN || ''

@@ -39,6 +39,7 @@ services:
       NODE_ENV: production
       PORT: 5000
       MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:-mindvision_admin}:${MONGO_ROOT_PASSWORD:-change-me-in-local-env}@mongodb:27017/mindvisiontech?authSource=admin
+      JWT_SECRET: ${JWT_SECRET:-mindvisiontech-dev-jwt-secret-min-32-chars-long}
       CLIENT_URL: https://mindvisiontech.com
       CORS_ORIGINS: https://mindvisiontech.com,https://www.mindvisiontech.com
       AWS_REGION: ${AWS_REGION:-ap-south-1}

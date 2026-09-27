@@ -1,9 +1,5 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Geist } from "next/font/google";
-import "../globals.css";
-
-const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Admin Panel | MindVisionTech",
@@ -11,13 +7,14 @@ export const metadata: Metadata = {
 };
 
 /**
- * Admin layout is completely isolated from the public layout.
- * No Header, Footer, Chatbot, or FloatingContactButton.
+ * Admin layout for all admin routes.
+ * The outer RootLayout provides the HTML and body; PublicChrome automatically
+ * suppresses public Header, Footer, FloatingContactButton, and Chatbot for /admin.
  */
 export default function AdminLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${geistSans.variable} h-full`}>
-      <body className="min-h-full bg-gray-50 antialiased">{children}</body>
-    </html>
+    <div className="min-h-screen bg-gray-50 text-slate-800 antialiased font-sans">
+      {children}
+    </div>
   );
 }

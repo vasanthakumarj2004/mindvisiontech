@@ -3,9 +3,7 @@ import type { ReactNode } from "react";
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { companyInfo } from "@/data/company";
-import { Header } from "@/components/Header";
-import { FloatingContactButton } from "@/components/FloatingContactButton";
-import { DeferredCourseChatbot } from "@/components/DeferredCourseChatbot";
+import { PublicChrome } from "@/components/PublicChrome";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -93,10 +91,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         />
       </head>
       <body className="min-h-full flex flex-col relative">
-        <Header />
+        <PublicChrome />
         {children}
-        <FloatingContactButton />
-        <DeferredCourseChatbot />
       </body>
     </html>
   );

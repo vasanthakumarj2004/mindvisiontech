@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock, Mail, Loader2 } from "lucide-react";
 import { adminLogin } from "@/lib/adminApi";
@@ -32,9 +33,16 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         {/* Brand mark */}
         <div className="mb-8 text-center">
-          <span className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-orange text-2xl font-black text-white shadow-lg">
-            M
-          </span>
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-white p-2.5 shadow-xl shadow-black/20 ring-1 ring-white/20">
+            <Image
+              src="/mindvisiontech-mark.svg"
+              alt="MindVisionTech Logo"
+              width={48}
+              height={48}
+              className="h-full w-full object-contain"
+              priority
+            />
+          </div>
           <h1 className="mt-4 text-2xl font-black text-white">Admin Login</h1>
           <p className="mt-1 text-sm text-white/50">MindVisionTech Admin Panel</p>
         </div>

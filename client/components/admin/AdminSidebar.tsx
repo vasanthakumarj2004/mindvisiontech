@@ -1,29 +1,24 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import {
   LayoutDashboard,
   BookOpen,
-  GraduationCap,
+  Users,
   LogOut,
   Menu,
   X,
-  ChevronRight,
 } from "lucide-react";
 import { adminLogout } from "@/lib/adminApi";
 import { useRouter } from "next/navigation";
 
-const TRACKS = [
-  { label: "3 Day Program", slug: "3-day" },
-  { label: "5 Day Program", slug: "5-day" },
-  { label: "12 Day Program", slug: "12-day" },
-];
-
 const NAV = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Courses", href: "/admin/courses", icon: BookOpen },
+  { label: "Students", href: "/admin/students", icon: Users },
 ];
 
 export function AdminSidebar() {
@@ -31,9 +26,6 @@ export function AdminSidebar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [internshipsOpen, setInternshipsOpen] = useState(
-    pathname.startsWith("/admin/internships")
-  );
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -47,22 +39,34 @@ export function AdminSidebar() {
   const sidebarContent = (
     <div className="flex h-full flex-col">
       {/* Brand */}
-      <div className="flex items-center gap-2 border-b border-white/10 px-6 py-5">
-        <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-orange font-black text-white text-sm">
-          M
-        </span>
-        <div>
-          <p className="text-sm font-black text-white leading-none">MindVisionTech</p>
-          <p className="text-[10px] text-white/50 font-semibold uppercase tracking-wider mt-0.5">
-            Admin Panel
-          </p>
-        </div>
+      <div className="border-b border-white/10 px-6 py-5">
+        <Link href="/admin/dashboard" className="flex items-center gap-3 group">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-white p-1.5 shadow-sm shrink-0 transition-transform group-hover:scale-105">
+            <Image
+              src="/mindvisiontech-mark.svg"
+              alt="MindVisionTech Logo"
+              width={28}
+              height={28}
+              className="h-full w-full object-contain"
+            />
+          </div>
+          <div>
+            <p className="text-sm font-black text-white leading-none group-hover:text-brand-orange transition-colors">
+              MindVisionTech
+            </p>
+            <p className="text-[10px] text-white/50 font-semibold uppercase tracking-wider mt-1">
+              Admin Panel
+            </p>
+          </div>
+        </Link>
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
         {NAV.map(({ label, href, icon: Icon }) => {
-          const active = pathname === href || (href !== "/admin" && pathname.startsWith(href));
+          const active =
+            pathname === href ||
+            (href !== "/admin" && pathname.startsWith(href));
           return (
             <Link
               key={href}
@@ -79,49 +83,6 @@ export function AdminSidebar() {
             </Link>
           );
         })}
-
-        {/* Internships accordion */}
-        <div>
-          <button
-            onClick={() => setInternshipsOpen((v) => !v)}
-            className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all ${
-              pathname.startsWith("/admin/internships")
-                ? "bg-white/15 text-white"
-                : "text-white/70 hover:bg-white/10 hover:text-white"
-            }`}
-          >
-            <GraduationCap className="h-4 w-4 shrink-0" />
-            <span className="flex-1 text-left">Internship Materials</span>
-            <ChevronRight
-              className={`h-3.5 w-3.5 transition-transform duration-200 ${
-                internshipsOpen ? "rotate-90" : ""
-              }`}
-            />
-          </button>
-
-          {internshipsOpen && (
-            <div className="ml-9 mt-1 space-y-0.5">
-              {TRACKS.map(({ label, slug }) => {
-                const href = `/admin/internships/${slug}`;
-                const active = pathname === href;
-                return (
-                  <Link
-                    key={slug}
-                    href={href}
-                    onClick={() => setOpen(false)}
-                    className={`block rounded-lg px-3 py-2 text-xs font-semibold transition-all ${
-                      active
-                        ? "bg-white text-brand-blue shadow-sm"
-                        : "text-white/60 hover:bg-white/10 hover:text-white"
-                    }`}
-                  >
-                    {label}
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
       </nav>
 
       {/* Logout */}
@@ -147,12 +108,18 @@ export function AdminSidebar() {
 
       {/* Mobile top bar */}
       <div className="lg:hidden fixed top-0 inset-x-0 z-40 flex h-14 items-center justify-between bg-brand-blue px-4 shadow-md">
-        <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-orange font-black text-white text-sm">
-            M
-          </span>
+        <Link href="/admin/dashboard" className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white p-1 shadow-sm shrink-0">
+            <Image
+              src="/mindvisiontech-mark.svg"
+              alt="MindVisionTech Logo"
+              width={24}
+              height={24}
+              className="h-full w-full object-contain"
+            />
+          </div>
           <span className="text-sm font-black text-white">Admin Panel</span>
-        </div>
+        </Link>
         <button
           onClick={() => setOpen((v) => !v)}
           className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-white"

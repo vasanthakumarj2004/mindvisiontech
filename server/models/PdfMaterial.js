@@ -6,9 +6,9 @@ const pdfMaterialSchema = new mongoose.Schema(
     url: { type: String, required: true, trim: true },
     s3Key: { type: String, required: true, trim: true }, // full S3 key, used for deletion
     fileSize: { type: Number, required: true }, // bytes
-    track: {
+    subject: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'InternshipTrack',
+      ref: 'Subject',
       required: true
     },
     uploadedBy: {
